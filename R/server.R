@@ -1,9 +1,14 @@
 
 
-# Define server logic required to draw a histogram
+#' App Server
+#' 
+#' Server for the survivor app
+#' 
+#' @param input List of inputs
+#' @param output List of outputs
 server <- function(input, output) {
     
-    output$distPlot <- renderPlot({
+    output$distPlot <- shiny::renderPlot({
         # generate bins based on input$bins from ui.R
         x    <- faithful[, 2]
         bins <- seq(min(x), max(x), length.out = input$bins + 1)
