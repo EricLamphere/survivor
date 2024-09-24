@@ -9,8 +9,11 @@
 #    https://shiny.posit.co/
 #
 
-source("src/ui.R")
-source("src/server.R")
 
-# Run the application 
-shinyApp(ui = ui, server = server)
+
+
+
+survivor <- function(ui, server) {
+    # Run the application 
+    shinyApp(ui = ui, server = server)  
+}

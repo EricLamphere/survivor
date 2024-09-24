@@ -1,0 +1,108 @@
+
+season: 47
+    
+
+picks:
+    tom: rome
+    kelsey: teeny
+    eric: tiyana
+    ali: caroline
+    janice: sol
+    paty: rachel
+    john: sierra
+    kathy: kishan
+    kelly: sue
+    mary: genevieve
+    chelsea: aysha
+
+castaways:
+    jon:
+        full_name: Jon Lovett
+        finish:
+            day: 3
+            inverse_placement: 1
+    andy:
+        full_name: Andy Rueda
+        finish:
+            day: null
+            inverse_placement: null
+    anika:
+        full_name: Anika Dhar
+        finish:
+            day: null
+            inverse_placement: null
+    aysha:
+        full_name: Aysha Welch
+        finish:
+            day: null
+            inverse_placement: null
+    caroline:
+        full_name: Caroline Vidmar
+        finish:
+            day: null
+            inverse_placement: null
+    teeny:
+        full_name: Christine "Teeny" Chirichillo
+        finish:
+            day: null
+            inverse_placement: null
+    gabe:
+        full_name: Gabe Ortis
+        finish:
+            day: null
+            inverse_placement: null
+    genevieve:
+        full_name: Genevieve Mushaluk
+        finish:
+            day: null
+            inverse_placement: null
+    rome:
+        full_name: Jerome "Rome" Cooney
+        finish:
+            day: null
+            inverse_placement: null
+    kishan:
+        full_name: Kishan Patel
+        finish:
+            day: null
+            inverse_placement: null
+    kyle:
+        full_name: Kyle Ostwald
+        finish:
+            day: null
+            inverse_placement: null
+    rachel:
+        full_name: Rachel LaMont
+        finish:
+            day: null
+            inverse_placement: null
+    sam:
+        full_name: Sam Phalen
+        finish:
+            day: null
+            inverse_placement: null
+    sierra:
+        full_name: Sierra Wright
+        finish:
+            day: null
+            inverse_placement: null
+    sol:
+        full_name: Solomon "Sol" Yi
+        finish:
+            day: null
+            inverse_placement: null
+    sue:
+        full_name: Sue Smey
+        finish:
+            day: null
+            inverse_placement: null
+    tk:
+        full_name: Terran "TK" Foster
+        finish:
+            day: null
+            inverse_placement: null
+    tiyana:
+        full_name: Tiyana Hallums
+        finish:
+            day: null
+            inverse_placement: null

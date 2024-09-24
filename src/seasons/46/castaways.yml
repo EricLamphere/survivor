@@ -1,0 +1,105 @@
+
+season: 46
+
+picks:
+    kathy: maria
+    john: venus
+    paty: tevin
+    janice: soda
+    kelsey: jem
+    eric: moriah
+    kelly: kenzie
+    tom: bhanu
+    ali: tim
+
+castaways:
+    jelinsky:
+        full_name: David Jelinsky
+        finish:
+            day: 3
+            inverse_placement: 1
+    jess:
+        full_name: Jessica "Jess" Chong
+        finish:
+            day: 5
+            inverse_placement: 2
+    randen:
+        full_name: Randen Montalvo
+        finish:
+            day: 7
+            inverse_placement: 3
+    bhanu:
+        full_name: Bhanu Gopal
+        finish:
+            day: 9
+            inverse_placement: 4
+    jem:
+        full_name: Jemila "Jem" Hussain-Adams
+        finish:
+            day: 11
+            inverse_placement: 5
+    moriah:
+        full_name: Moriah Gaynor
+        finish:
+            day: 13
+            inverse_placement: 6
+    tim:
+        full_name: Tim Spicer
+        finish:
+            day: 14
+            inverse_placement: 7
+    soda:
+        full_name: Sodasia "Soda" Thompson
+        finish:
+            day: 14
+            inverse_placement: 8
+    tevin:
+        full_name: Tevin Davis
+        finish:
+            day: 16
+            inverse_placement: 9
+    hunter:
+        full_name: Hunter McKnight
+        finish:
+            day: 17
+            inverse_placement: 10
+    tiffany:
+        full_name: Tiffany Nicole Ervin
+        finish:
+            day: 19
+            inverse_placement: 11
+    venus:
+        full_name: Venus Vafa
+        finish:
+            day: 21
+            inverse_placement: 12
+    q:
+        full_name: Quintavius "Q" Burdette
+        finish:
+            day: 23
+            inverse_placement: 13
+    maria:
+        full_name: Maria Shrime Gonzalez
+        finish:
+            day: 24
+            inverse_placement: 14
+    liz:
+        full_name: Liz Wilcox
+        finish:
+            day: 25
+            inverse_placement: 15
+    ben:
+        full_name: Ben Katzman
+        finish:
+            day: 26
+            inverse_placement: 16
+    charlie:
+        full_name: Charlie Davis
+        finish:
+            day: 26
+            inverse_placement: 17
+    kenzie:
+        full_name: Kenzie Petty
+        finish:
+            day: 26
+            inverse_placement: 18
