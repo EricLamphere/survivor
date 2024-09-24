@@ -11,3 +11,6 @@ Survivor pool application for choosing survivors, calculating winnings, and look
 * The loser pays $1 per day for each additional day the winner lasted compared to the player they chose
 * If the winners player is the sole survivor, then each loser must pay an additional $5 to the winner
 * If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season
+
+## Dev Resources
+* [Mastering Shiny - Packages](https://mastering-shiny.org/scaling-packaging.html#extra-steps)
