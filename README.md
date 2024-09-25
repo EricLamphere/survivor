@@ -12,5 +12,12 @@ Survivor pool application for choosing survivors, calculating winnings, and look
 * If the winners player is the sole survivor, then each loser must pay an additional $5 to the winner
 * If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season
 
+
+## Update Data
+1. When a survivor is voted out, update the relevant fields in the config file in `data-raw/configs/seasons/`
+2. Run the `data-raw/process_configs.R` script manually
+
 ## Dev Resources
 * [Mastering Shiny - Packages](https://mastering-shiny.org/scaling-packaging.html#extra-steps)
+* [Another survivor app](https://github.com/ErichDenk/survivor/tree/main?tab=readme-ov-file)
+* [Using data in R package](https://grasshoppermouse.github.io/posts/2017-10-18-put-your-data-in-an-r-package/)

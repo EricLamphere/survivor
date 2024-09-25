@@ -7,6 +7,17 @@ Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
-    shiny
+    shiny,
+    shinydashboard,
+    dplyr,
+    purrr,
+    emoji,
+    formattable,
+    bslib,
+    yaml,
+    ezverse
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+LazyData: true
+Depends: 
+    R (>= 2.10)

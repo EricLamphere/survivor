@@ -1,0 +1,15 @@
+
+
+#' @title Season Picks
+#' @description Picks across all seasons recorded in this repo
+#' @format A data frame with 36 rows and 8 variables:
+#' \describe{
+#'   \item{\code{season}}{integer Season number}
+#'   \item{\code{person_id}}{character The ID for the person in the pool}
+#'   \item{\code{person_first}}{character First name of the person in the pool}
+#'   \item{\code{person_last}}{character Last name of the person in the pool}
+#'   \item{\code{castaway_id}}{character ID for the castaway}
+#'   \item{\code{castaway_name}}{character Full name of the castaway}
+#'   \item{\code{castaway_finish_day}}{integer The day the castaway was voted out}
+#'   \item{\code{castaway_finish_inverse_placement}}{integer The inverse placement of the castaway} 
+#'}
