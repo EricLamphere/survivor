@@ -37,6 +37,7 @@ ui <- function(input) {
                 running it will be the one stop shop for picking castaways and
                 keeping track of days lasted."
                 ),
+                shiny::br(),
                 shiny::h2("Rules"),
                 shiny::tags$li("Everyone picks a player at the end of the first episode"),
                 shiny::tags$ul(
@@ -48,6 +49,7 @@ ui <- function(input) {
                 shiny::tags$li("The loser pays $1 per day for each additional day the winner lasted compared to the player they chose"),
                 shiny::tags$li("If the winners player is the sole survivor, then each loser must pay an additional $5 to the winner"),
                 shiny::tags$li("If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season"),
+                shiny::br(),
                 shiny::h2("Thank you!"),
                 shiny::span(
                     "Please let me know if you have any trouble with the website. I'll 

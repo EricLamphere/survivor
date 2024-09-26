@@ -17,6 +17,7 @@ format_picks_table <- function(szn = default_season()) {
             )
         ) %>%
         dplyr::transmute(
+            Season = season,
             Peeps = trimws(person_first %&% " " %&% person_last),
             Castaway = castaway_name,
             `Day Voted Out` = castaway_finish_day,
