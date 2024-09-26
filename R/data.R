@@ -12,4 +12,9 @@
 #'   \item{\code{castaway_name}}{character Full name of the castaway}
 #'   \item{\code{castaway_finish_day}}{integer The day the castaway was voted out}
 #'   \item{\code{castaway_finish_inverse_placement}}{integer The inverse placement of the castaway} 
+#'   \item{\code{eliminated}}{logical Whether or not survivor has been eliminated}
+#'   \item{\code{castaway_finish_placement}}{double Rank based on when castaway was voted out}
+#'   \item{\code{sole_survivor}}{logical Whether or not the castaway was the sole survivor} 
 #'}
+#' @details Season configs processed into a table
+"season_picks"

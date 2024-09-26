@@ -99,8 +99,8 @@ castaways:
     tk:
         full_name: Terran "TK" Foster
         finish:
-            day: null
-            inverse_placement: null
+            day: 5
+            inverse_placement: 2
     tiyana:
         full_name: Tiyana Hallums
         finish:

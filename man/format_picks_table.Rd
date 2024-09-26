@@ -4,10 +4,10 @@
 \alias{format_picks_table}
 \title{Format Season Picks Table}
 \usage{
-format_picks_table(season = default_season())
+format_picks_table(szn = default_season())
 }
 \arguments{
-\item{season}{Season number}
+\item{szn}{Season number. Defaults to \code{default_season()}}
 }
 \description{
 Selects, renames, and formats relevant columns for the app

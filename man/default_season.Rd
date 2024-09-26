@@ -7,5 +7,5 @@
 default_season()
 }
 \description{
-Default season number
+Returns the most recent seasons number
 }

@@ -3,6 +3,8 @@
 #' App UI
 #'
 #' UI of the survivor app
+#' 
+#' @param input Shiny input
 ui <- function(input) {
     header <- shinydashboard::dashboardHeader(title = glue::glue("Survivor Pool"),
                                               titleWidth = 350)

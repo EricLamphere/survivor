@@ -83,5 +83,6 @@ season_picks <- purrr::map_dfr(
     )
 
 
+# WHEN THIS TABLE IS UPDATED: update the data.R doc string
 usethis::use_data(season_picks, overwrite = TRUE)
-
+# sinew::makeOxygen(season_picks)

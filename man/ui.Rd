@@ -6,6 +6,9 @@
 \usage{
 ui(input)
 }
+\arguments{
+\item{input}{Shiny input}
+}
 \description{
 UI of the survivor app
 }

@@ -10,14 +10,11 @@ Imports:
     shiny,
     shinydashboard,
     dplyr,
-    purrr,
-    emoji,
     formattable,
     bslib,
-    yaml,
-    ezverse,
     scales,
-    kableExtra
+    glue,
+    ezextras
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LazyData: true
