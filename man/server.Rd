@@ -4,7 +4,7 @@
 \alias{server}
 \title{App Server}
 \usage{
-server(input, output, session)
+server(input, output)
 }
 \arguments{
 \item{input}{List of inputs}

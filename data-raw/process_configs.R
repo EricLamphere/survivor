@@ -74,7 +74,13 @@ season_picks <- purrr::map_dfr(
         people = people_lookup
     )
 ) %>%
-    dplyr::arrange(dplyr::desc(season))
+    dplyr::arrange(dplyr::desc(season)) %>%
+    dplyr::group_by(season) %>%
+    dplyr::mutate(
+        eliminated = dplyr::if_else(!is.na(castaway_finish_day), TRUE, FALSE),
+        castaway_finish_placement = 1 + (dplyr::n() - castaway_finish_inverse_placement),
+        sole_survivor = dplyr::if_else(castaway_finish_placement == 1, TRUE, FALSE)
+    )
 
 
 usethis::use_data(season_picks, overwrite = TRUE)

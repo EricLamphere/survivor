@@ -15,7 +15,9 @@ Imports:
     formattable,
     bslib,
     yaml,
-    ezverse
+    ezverse,
+    scales,
+    kableExtra
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LazyData: true

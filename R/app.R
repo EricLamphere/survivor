@@ -3,8 +3,7 @@
 #' Run Survivor App
 #' 
 #' Starts the survivor app
-survivor <- function() {
-    # Run the application 
+jeff <- function() {
     shiny::shinyApp(
         ui = ui, 
         server = server
