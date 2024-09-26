@@ -24,7 +24,7 @@ format_picks_table <- function(szn = default_season()) {
             Rank = scales::ordinal(castaway_finish_placement),
             `Sole Survivor` = dplyr::case_when(
                 sole_survivor ~ glue::glue("{emoji::emoji('tada')}{emoji::emoji('star')} WINNER {emoji::emoji('star')}{emoji::emoji('tada')}"),
-                !is.na(`Day Voted Out`) ~ glue::glue("Nope {emoji::emoji('pensive')}"),
+                !is.na(`Day Voted Out`) ~ glue::glue("{emoji::emoji('x')}"),
                 TRUE ~ NA_character_
             )
         ) %>%
@@ -37,7 +37,15 @@ format_picks_table <- function(szn = default_season()) {
     
     formatted <-
         processed %>%
-        formattable::formattable()
+        formattable::formattable(
+            # list(
+            #     Peeps = formattable::formatter("span", style = x ~ formattable::style(
+            #         `background-color` = "gray",
+            #         display = "block",
+            #         padding = "0px"
+            #     ))
+            # )
+        )
     
     formatted
 }
