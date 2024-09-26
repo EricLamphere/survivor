@@ -76,7 +76,7 @@ ui <- function(input) {
                     selected = default_season()
                 ),
                 shiny::h2("Standings"),
-                formattable::formattableOutput("formatted_picks_table")
+                formattable::formattableOutput("formatted_picks_table", width = "800px")
             )
         )
     )

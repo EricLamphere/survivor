@@ -80,7 +80,8 @@ season_picks <- purrr::map_dfr(
         eliminated = dplyr::if_else(!is.na(castaway_finish_day), TRUE, FALSE),
         castaway_finish_placement = 1 + (dplyr::n() - castaway_finish_inverse_placement),
         sole_survivor = dplyr::if_else(castaway_finish_placement == 1, TRUE, FALSE)
-    )
+    ) %>%
+    dplyr::ungroup()
 
 
 # WHEN THIS TABLE IS UPDATED: update the data.R doc string

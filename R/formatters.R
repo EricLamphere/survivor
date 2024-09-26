@@ -14,11 +14,10 @@ format_picks_table <- function(szn = default_season()) {
             person_last = dplyr::case_when(
                 person_last == "last_name_unknown" ~ NA_character_,
                 TRUE ~ person_last
-            ),
-            full_name = trimws(person_first %&% " " %&% person_last)
+            )
         ) %>%
         dplyr::transmute(
-            Peeps = person_first %&% " " %&% person_last,
+            Peeps = trimws(person_first %&% " " %&% person_last),
             Castaway = castaway_name,
             `Day Voted Out` = castaway_finish_day,
             Rank = scales::ordinal(castaway_finish_placement),
