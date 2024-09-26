@@ -202,7 +202,7 @@ cleanup_season_picks <- function(season_picks) {
 create_season_picks <- function(config_path = "data-raw/configs", cost_per_day = 1, sole_survivor_bonus = 5) {
     seasons_tbl <- process_seasons(config_path = config_path)
     
-    a <- seasons_tbl %>%
+    seasons_tbl %>%
         calculate_castaway_fields() %>%
         calculate_person_fields(
             cost_per_day = cost_per_day, 
