@@ -8,11 +8,12 @@
 #'   \item{\code{person_id}}{character The ID for the person in the pool}
 #'   \item{\code{person_first}}{character First name of the person in the pool}
 #'   \item{\code{person_last}}{character Last name of the person in the pool}
+#'   \item{\code{person_payment}}{integer The amount of money owed for the losers, or the amount of money won by the winner} 
+#'   \item{\code{person_rank}}{double Rank based on whos castaway lasted the longest} 
 #'   \item{\code{castaway_id}}{character ID for the castaway}
 #'   \item{\code{castaway_name}}{character Full name of the castaway}
 #'   \item{\code{castaway_finish_day}}{integer The day the castaway was voted out}
-#'   \item{\code{castaway_finish_inverse_placement}}{integer The inverse placement of the castaway} 
-#'   \item{\code{eliminated}}{logical Whether or not survivor has been eliminated}
+#'   \item{\code{castaway_eliminated}}{logical Whether or not survivor has been eliminated}
 #'   \item{\code{castaway_finish_placement}}{double Rank based on when castaway was voted out}
 #'   \item{\code{sole_survivor}}{logical Whether or not the castaway was the sole survivor} 
 #'}

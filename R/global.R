@@ -1,7 +1,7 @@
 
 
-library(dplyr)
-library(ezextras)
-library(purrr)
-library(shiny)
-library(shinydashboard)
+suppressMessages({
+    library(dplyr)
+    library(ezextras)
+    library(purrr) 
+})

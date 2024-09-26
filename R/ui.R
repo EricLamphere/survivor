@@ -59,7 +59,7 @@ ui <- function(input) {
                 ),
                 shiny::div(
                     shiny::img(
-                        src = "jeff-probst-rollercoaster.gif",
+                        src = "jeff-probst-surprised.gif",
                         align = "center",
                         height = "450px",
                         width = "600px"

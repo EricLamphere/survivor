@@ -4,10 +4,13 @@
 \alias{get_season_picks}
 \title{List Season Castaways}
 \usage{
-get_season_picks(szn = default_season())
+get_season_picks(szn = default_season(), picked = FALSE)
 }
 \arguments{
 \item{szn}{Integer, season number}
+
+\item{picked}{Logical, whether or not to filter only to the castaways
+that have been picked}
 }
 \description{
 List castaways for a given season
