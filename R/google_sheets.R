@@ -21,6 +21,6 @@ gs_auth <- function(cache = ".secrets", email = "elampsart@gmail.com", deauth_mo
 #' 
 #' Uses [googlesheets4::gs4_get()] to get nested data frame of sheets and tabs
 gs_srvivor_spreadsheet <- function() {
-    url <- "https://docs.google.com/spreadsheets/d/1-lTGtzfeH4_Fq0hq6p5WsC760F3x0Ir4TbN7gLMu2UM/edit?gid=0#gid=0"
+    url <- "https://docs.google.com/spreadsheets/d/1-lTGtzfeH4_Fq0hq6p5WsC760F3x0Ir4TbN7gLMu2UM"
     googlesheets4::gs4_get(url)
 }

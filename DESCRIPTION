@@ -16,7 +16,9 @@ Imports:
     glue,
     ezextras,
     cli,
-    googlesheets4
+    googlesheets4,
+    emoji,
+    crayon
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LazyData: true
