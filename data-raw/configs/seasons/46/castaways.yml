@@ -41,10 +41,12 @@ castaways:
         full_name: Tim Spicer
         finish:
             day: 14
+            tie_breaker: 2
     soda:
         full_name: Sodasia "Soda" Thompson
         finish:
             day: 14
+            tie_breaker: 1
     tevin:
         full_name: Tevin Davis
         finish:

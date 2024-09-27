@@ -74,3 +74,46 @@ get_season_picking_order <- function(szn = default_season()) {
         dplyr::distinct(person_id) %>%
         dplyr::pull(person_id)
 }
+
+
+#' Last Castaway Voted Out
+#' 
+#' Get the name of the last castaway voted out. If the season is over, returns
+#' the two runners up. If the season just started, returns a string saying no
+#' one has been voted out yet
+#' 
+#' @param szn Season number
+last_voted_out <- function(szn = default_season()) {
+    picks <- get_season_picks(szn = szn)
+    
+    # if no one has been voted out yet, say so
+    if (!any(picks$castaway_eliminated)) {
+        return("No one voted out yet!")
+    }
+    
+    # if the season is over, return the runners up
+    if (all(picks$castaway_eliminated)) {
+        runners_up <- 
+            picks %>%
+            dplyr::filter(castaway_finish_placement %in% c(2, 3)) %>%
+            dplyr::pull(castaway_name)
+        
+        return(paste(runners_up, collapse = " and "))
+    }
+    
+    last_voted_out <- 
+        picks %>%
+        dplyr::filter(castaway_finish_day == max(castaway_finish_day, na.rm = TRUE)) %>%
+        dplyr::pull(castaway_name)
+    
+    last_voted_out
+}
+
+#' Get Number of Remaining Castaways
+#' 
+#' @param szn Season number
+get_castaways_remaining <- function(szn = default_season()) {
+    picks <- get_season_picks(szn = szn)
+    
+    sum(!picks$castaway_eliminated)
+}

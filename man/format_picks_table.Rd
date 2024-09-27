@@ -4,10 +4,19 @@
 \alias{format_picks_table}
 \title{Format Season Picks Table}
 \usage{
-format_picks_table(szn = default_season())
+format_picks_table(
+  szn = default_season(),
+  picks_only = FALSE,
+  search = "Everyone"
+)
 }
 \arguments{
 \item{szn}{Season number. Defaults to \code{default_season()}}
+
+\item{picks_only}{Logical, whether or not to only show castaways that have
+been picked by a contestant}
+
+\item{search}{Character, text used to search the names of castaways}
 }
 \description{
 Selects, renames, and formats relevant columns for the app

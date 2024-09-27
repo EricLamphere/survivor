@@ -38,6 +38,7 @@ process_season_config <- function(config, people) {
                 castaway_id = .y,
                 castaway_name = .x$full_name,
                 castaway_finish_day = .x$finish$day %||% NA_integer_,
+                castaway_finish_tie_breaker = .x$finish$tie_breaker %||% NA_integer_,
                 castaway_finish_finalist = .x$finish$finalist %||% NA_integer_
             )
         )
@@ -102,7 +103,8 @@ calculate_castaway_fields <- function(seasons_tbl) {
         dplyr::arrange(dplyr::desc(season)) %>%
         dplyr::group_by(season) %>%
         dplyr::mutate(
-            castaway_rank = dplyr::if_else(is.na(castaway_finish_day), NA, 1 + dplyr::n() - rank(castaway_finish_day)),
+            castaway_day_with_tie_breaker = dplyr::if_else(is.na(castaway_finish_tie_breaker), castaway_finish_day, castaway_finish_day + 1/(1+castaway_finish_tie_breaker)),
+            castaway_rank = dplyr::if_else(is.na(castaway_day_with_tie_breaker), NA, 1 + dplyr::n() - rank(castaway_day_with_tie_breaker)),
             castaway_eliminated = dplyr::if_else(!is.na(castaway_finish_day), TRUE, FALSE),
             castaway_finish_placement = dplyr::if_else(
                 is.na(castaway_finish_finalist),
@@ -112,7 +114,7 @@ calculate_castaway_fields <- function(seasons_tbl) {
             sole_survivor = dplyr::if_else(castaway_finish_placement == 1, TRUE, FALSE)
         ) %>%
         dplyr::ungroup() %>%
-        dplyr::select(-c(castaway_rank, castaway_finish_finalist))
+        dplyr::select(-c(castaway_day_with_tie_breaker, castaway_finish_tie_breaker, castaway_rank, castaway_finish_finalist))
 }
 
 #' Calculate Payments & Rank
@@ -150,14 +152,31 @@ calculate_person_fields <- function(seasons_tbl, cost_per_day, sole_survivor_bon
     }
     
     winner_n_days <- max(picks$castaway_finish_day)
-    season_with_payments <- dplyr::mutate(
-        picks,
-        person_payment = cost_per_day * (winner_n_days - castaway_finish_day)
-    )
+    season_with_payments <-
+        picks %>%
+        dplyr::mutate(
+            person_winner = castaway_finish_day == max(castaway_finish_day),
+            person_payment = cost_per_day * (winner_n_days - castaway_finish_day)
+        )
     
     if (any(picks$sole_survivor, na.rm = TRUE)) {
         season_with_payments <- dplyr::mutate(season_with_payments, person_payment = person_payment + sole_survivor_bonus)
     }
+    
+    season_with_payments <-
+        season_with_payments %>%
+        dplyr::mutate(
+            person_payment = dplyr::if_else(
+                person_winner,
+                0,
+                person_payment
+            ),
+            person_payment = dplyr::if_else(
+                person_winner,
+                sum(person_payment),
+                person_payment
+            )
+        )
     
     season_with_payments
 }
