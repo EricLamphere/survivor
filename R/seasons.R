@@ -103,6 +103,7 @@ last_voted_out <- function(szn = default_season()) {
     
     last_voted_out <- 
         picks %>%
+        dplyr::filter(season == max(season)) %>%
         dplyr::filter(castaway_finish_day == max(castaway_finish_day, na.rm = TRUE)) %>%
         dplyr::pull(castaway_name)
     

@@ -74,7 +74,17 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
                 Peeps = picks_formatter(`Pool Rank` == "1st"),
                 `Pool Rank` = picks_formatter(`Pool Rank` == "1st"),
                 `What You Owe` = picks_formatter(`Pool Rank` == "1st"),
-                Castaway = picks_formatter(`Castaway Rank` == "1st"),
+                Castaway = formattable::formatter(
+                    "span", 
+                    style = ~ formattable::style(
+                        color = dplyr::case_when(
+                            `Castaway Rank` == "1st" ~ "green",
+                            `Day Voted Out` != "-" ~ "red",
+                            TRUE ~ "black"
+                        )
+                        # "text-decoration" = ifelse(x %in% eliminated$cast, "line-through", NA)
+                    )
+                ),
                 `Castaway Rank` = picks_formatter(`Castaway Rank` == "1st"),
                 `Sole Survivor` = picks_formatter(`Castaway Rank` == "1st")
             )
