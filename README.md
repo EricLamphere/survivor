@@ -21,3 +21,5 @@ Survivor pool application for choosing survivors, calculating winnings, and look
 * [Mastering Shiny - Packages](https://mastering-shiny.org/scaling-packaging.html#extra-steps)
 * [Another survivor app](https://github.com/ErichDenk/survivor/tree/main?tab=readme-ov-file)
 * [Using data in R package](https://grasshoppermouse.github.io/posts/2017-10-18-put-your-data-in-an-r-package/)
+* [Glyphicons](https://getbootstrap.com/docs/3.3/components/#glyphicons)
+* [Shiny Dashboard](https://rstudio.github.io/shinydashboard/structure.html)
