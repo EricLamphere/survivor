@@ -132,3 +132,17 @@ get_castaways_remaining <- function(szn = default_season()) {
     
     sum(!picks$castaway_eliminated)
 }
+
+
+#' Make Season Wiki Link
+#' 
+#' @param szn Season number
+make_season_wiki_link <- function(szn = default_season()) {
+    if (szn == all_seasons_label()) {
+        szn <- default_season()
+    }
+    paste0("https://en.wikipedia.org/wiki/Survivor_", szn)
+}
+
+
+

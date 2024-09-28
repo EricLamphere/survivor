@@ -13,7 +13,6 @@ ui <- function(input) {
         titleWidth = 350
     )
     
-    
     sidebar <- shinydashboard::dashboardSidebar(
         width = 350,
         shinydashboard::sidebarMenu(
@@ -52,9 +51,10 @@ ui <- function(input) {
                 "welcome",
                 shiny::h2("Welcome!"),
                 shiny::p(
-                    "Welcome! This site is still in development, but once it's up and
-                running it will be the one stop shop for picking castaways and
-                keeping track of days lasted."
+                    "Welcome! This site is still in development so bear with me as I get things up and running. 
+                    The plan is to use this site as a one stop shop for everything related to the survivor pool.
+                    
+                    "
                 ),
                 shiny::br(),
                 shiny::h2("Rules"),
@@ -69,12 +69,11 @@ ui <- function(input) {
                 shiny::tags$li("If the winners player is the sole survivor, then each loser must pay an additional $5 to the winner"),
                 shiny::tags$li("If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season"),
                 shiny::br(),
-                shiny::h2("Thank you!"),
-                shiny::span(
+                shiny::h2("Enjoy!"),
+                shiny::p(
                     "Please let me know if you have any trouble with the website. I'll 
-                be adding features and refining the design over time to expand 
-                functionality and improve your experience",
-                    style = "font-family: 'times'; font-si20pt"
+                    be adding features and refining the design over time to expand 
+                    functionality and improve your experience"
                 ),
                 shiny::div(
                     shiny::img(
@@ -90,12 +89,27 @@ ui <- function(input) {
             # PICKS
             shinydashboard::tabItem(
                 "standings",
+                shiny::h2("Last Week on Survivor"),
                 shiny::fluidRow(
                     shinydashboard::infoBoxOutput("last_voted_out_box"),
-                    shinydashboard::infoBoxOutput("castaways_remaining_box")
+                    shinydashboard::infoBoxOutput("castaways_remaining_box"),
+                    shinydashboard::infoBoxOutput("season_wiki_box")
                 ),
-                shiny::h2("Standings"),
-                DT::dataTableOutput("formatted_picks_table", width = "900px")
+                shiny::fluidRow(
+                    shiny::tags$style(
+                        '#standings :is(th, td) {padding: 0;}'
+                    ),
+                    shinydashboard::box(
+                        title = "Standings", 
+                        status = "primary", 
+                        solidHeader=TRUE, 
+                        shiny::div(
+                            DT::dataTableOutput("formatted_picks_table"),
+                            style = "width = 80%"
+                        ),
+                        width = "80%"
+                    )
+                )
             )
         )
     )

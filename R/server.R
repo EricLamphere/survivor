@@ -40,6 +40,20 @@ server <- function(input, output) {
             "Castaways remaining", 
             get_castaways_remaining(szn = season_input()), 
             icon = shiny::icon("fire"),
+            color = "orange"
+        )
+    })
+    
+    output$season_wiki_box <- shinydashboard::renderInfoBox({
+        shinydashboard::infoBox(
+            "Wiki Link", 
+            shiny::tags$a(
+                href = make_season_wiki_link(szn = season_input()),
+                glue::glue(
+                    "Season {ifelse(season_input() == all_seasons_label(), default_season(), season_input())}"
+                )
+            ), 
+            icon = shiny::icon("link"),
             color = "aqua"
         )
     })

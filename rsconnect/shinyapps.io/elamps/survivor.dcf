@@ -5,6 +5,6 @@ account: elamps
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12861110
-bundleId: 9157930
+bundleId: 9157997
 url: https://ericlamphere.shinyapps.io/survivor/
 version: 1

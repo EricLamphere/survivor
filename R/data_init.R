@@ -85,7 +85,7 @@ process_season_config <- function(config, participants) {
         dplyr::mutate(
             season = season, 
             season_cost_per_day = cost_per_day,
-            season_sole_survivor_bonus = cost_per_day
+            season_sole_survivor_bonus = sole_survivor_bonus
         )
     
     dplyr::bind_rows(combined, not_picked)
