@@ -7,10 +7,9 @@
 #' @param szn Season number. Defaults to `default_season()`
 #' @param picks_only Logical, whether or not to only show castaways that have 
 #'  been picked by a contestant
-#' @param search Character, text used to search the names of castaways
 #' 
 #' @export
-format_picks_table <- function(szn = default_season(), picks_only = FALSE, search = "Everyone") {
+format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     picks <- get_season_picks(szn = szn, picked = picks_only)
     
     display_fields_added <- 
@@ -51,12 +50,6 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
                 `What You Owe` = scales::dollar(participant_payment)
             ) |>
             dplyr::select(Season, Peeps, `What You Owe`, dplyr::everything())
-    }
-    
-    if (search != "Everyone") {
-        display_fields_added <-
-            display_fields_added |>
-            dplyr::filter(Castaway %~% search)
     }
     
     final_cleaning <-

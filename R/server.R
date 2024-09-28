@@ -18,16 +18,11 @@ server <- function(input, output) {
         input$picks_only
     })
     
-    search_input <- shiny::reactive({
-        input$search
-    })
-    
     # Outputs ----
     output$formatted_picks_table <- DT::renderDataTable(
         expr = format_picks_table(
             szn = season_input(),
-            picks_only = picks_only_input(),
-            search = search_input()
+            picks_only = picks_only_input()
         )
     )
     

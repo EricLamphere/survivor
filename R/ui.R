@@ -34,11 +34,6 @@ ui <- function(input) {
                     choices = c(all_seasons_label(), list_seasons()),
                     selected = default_season()
                 ),
-                shiny::textInput(
-                    "search", 
-                    "Search castaways", 
-                    value = "Everyone"
-                ),
                 shiny::checkboxInput(
                     "picks_only",
                     shiny::tags$b("Only show our picks"),
