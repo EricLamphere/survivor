@@ -1,5 +1,7 @@
 
 season: 46
+cost_per_day: 1
+sole_survivor_bonus: 2
 
 picks:
     kathy: maria

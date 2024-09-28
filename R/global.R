@@ -1,7 +1,10 @@
 
 
-suppressMessages({
+
+if (interactive()) {
     library(dplyr)
     library(ezextras)
-    library(purrr) 
-})
+    library(purrr)
+    
+    season_picks <- create_season_picks("googlesheets")  
+}

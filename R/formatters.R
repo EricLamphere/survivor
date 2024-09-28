@@ -14,19 +14,19 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
     picks <- get_season_picks(szn = szn, picked = picks_only)
     
     display_fields_added <- 
-        picks %>%
+        picks |>
         dplyr::mutate(
-            person_last = dplyr::case_when(
-                person_last == "last_name_unknown" ~ NA_character_,
-                TRUE ~ person_last
+            participant_last = dplyr::case_when(
+                participant_last == "last_name_unknown" ~ NA_character_,
+                TRUE ~ participant_last
             ),
             Season = season,
             Peeps = ifelse(
-                !is.na(person_winner) & person_winner,
-                glue::glue("{emoji::emoji('star')} {trimws(person_first %&% ' ' %&% person_last)} {emoji::emoji('star')}"),
-                trimws(person_first %&% " " %&% person_last)
+                !is.na(participant_winner) & participant_winner,
+                glue::glue("{emoji::emoji('star')} {trimws(participant_first %&% ' ' %&% participant_last)} {emoji::emoji('star')}"),
+                trimws(participant_first %&% " " %&% participant_last)
             ),
-            `Pool Rank` = scales::ordinal(person_rank),
+            `Pool Rank` = scales::ordinal(participant_rank),
             Castaway = ifelse(
                 !is.na(sole_survivor) & sole_survivor, 
                 glue::glue("{emoji::emoji('star')} {castaway_name} {emoji::emoji('star')}"),
@@ -41,36 +41,36 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
             )
         )
     
-    tmp_filt_picks_only <- dplyr::filter(display_fields_added, !is.na(person_id))
+    tmp_filt_picks_only <- dplyr::filter(display_fields_added, !is.na(participant_id))
     # if all picked castaways have been voted out (or won), show pricing field
     # next to the participants name
     if (all(!is.na(tmp_filt_picks_only$castaway_finish_day))) {
         display_fields_added <-
-            display_fields_added %>%
+            display_fields_added |>
             dplyr::mutate(
-                `What You Owe` = scales::dollar(person_payment)
-            ) %>%
+                `What You Owe` = scales::dollar(participant_payment)
+            ) |>
             dplyr::select(Season, Peeps, `What You Owe`, dplyr::everything())
     }
     
     if (search != "Everyone") {
         display_fields_added <-
-            display_fields_added %>%
+            display_fields_added |>
             dplyr::filter(Castaway %~% search)
     }
     
     final_cleaning <-
-        display_fields_added %>%
+        display_fields_added |>
         dplyr::mutate(
             dplyr::across(
                 dplyr::everything(),
                 ~ dplyr::if_else(is.na(.x), "-", as.character(.x))
             )
-        ) %>%
+        ) |>
         dplyr::select(-dplyr::any_of(colnames(season_picks))) # remove non-display columns
     
     formatted <-
-        final_cleaning %>%
+        final_cleaning |>
         formattable::formattable(
             list(
                 Peeps = picks_formatter(`Pool Rank` == "1st"),

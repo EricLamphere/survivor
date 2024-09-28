@@ -4,6 +4,8 @@
 #' 
 #' List the seasons available in this repository that have been set up
 #' with a config file listing the survivors and picks
+#' 
+#' @export
 list_seasons <- function() {
     unique(season_picks$season)
 }
@@ -12,6 +14,8 @@ list_seasons <- function() {
 #' Default Season
 #' 
 #' Returns the most recent seasons number
+#' 
+#' @export
 default_season <- function() {
     max(season_picks$season)
 }
@@ -19,6 +23,8 @@ default_season <- function() {
 #' Label for All Seasons
 #' 
 #' The label used to specify all seasons
+#' 
+#' @export
 all_seasons_label <- function() {
     "All Seasons"
 }
@@ -30,6 +36,8 @@ all_seasons_label <- function() {
 #' @param szn Integer, season number
 #' @param picked Logical, whether or not to filter only to the castaways
 #'  that have been picked
+#' 
+#' @export
 get_season_picks <- function(szn = default_season(), picked = FALSE) {
     all_szn_label <- all_seasons_label()
     if (szn == all_szn_label) {
@@ -39,7 +47,7 @@ get_season_picks <- function(szn = default_season(), picked = FALSE) {
     }
     
     if (picked) {
-        picks <- dplyr::filter(picks, !is.na(person_id))
+        picks <- dplyr::filter(picks, !is.na(participant_id))
     }
     
     picks
@@ -56,6 +64,8 @@ get_season_picks <- function(szn = default_season(), picked = FALSE) {
 #'    may need to be added manually
 #' 
 #' @param szn Integer, the season to find the picking order for
+#' 
+#' @export
 get_season_picking_order <- function(szn = default_season()) {
     if (szn == all_seasons_label()) {
         cli::cli_alert_info("Picking order not implemented when all seasons selected - returning NULL")
@@ -66,13 +76,13 @@ get_season_picking_order <- function(szn = default_season()) {
     if (last_szn %notin% unique(season_picks$season)) {
         cli::cli_alert_info("No previous season to determine order by, sorting everyone randomly")
         all_season_picks <- get_season_picks(all_seasons_label(), picked = TRUE)
-        return(sample(unique(all_season_picks$person_id)))
+        return(sample(unique(all_season_picks$participant_id)))
     }
     
-    get_season_picks(szn = last_szn, picked = TRUE) %>%
-        dplyr::arrange(desc(castaway_finish_placement)) %>%
-        dplyr::distinct(person_id) %>%
-        dplyr::pull(person_id)
+    get_season_picks(szn = last_szn, picked = TRUE) |>
+        dplyr::arrange(desc(castaway_finish_placement)) |>
+        dplyr::distinct(participant_id) |>
+        dplyr::pull(participant_id)
 }
 
 
@@ -83,6 +93,8 @@ get_season_picking_order <- function(szn = default_season()) {
 #' one has been voted out yet
 #' 
 #' @param szn Season number
+#' 
+#' @export
 last_voted_out <- function(szn = default_season()) {
     picks <- get_season_picks(szn = szn)
     
@@ -94,17 +106,17 @@ last_voted_out <- function(szn = default_season()) {
     # if the season is over, return the runners up
     if (all(picks$castaway_eliminated)) {
         runners_up <- 
-            picks %>%
-            dplyr::filter(castaway_finish_placement %in% c(2, 3)) %>%
+            picks |>
+            dplyr::filter(castaway_finish_placement %in% c(2, 3)) |>
             dplyr::pull(castaway_name)
         
         return(paste(runners_up, collapse = " and "))
     }
     
     last_voted_out <- 
-        picks %>%
-        dplyr::filter(season == max(season)) %>%
-        dplyr::filter(castaway_finish_day == max(castaway_finish_day, na.rm = TRUE)) %>%
+        picks |>
+        dplyr::filter(season == max(season)) |>
+        dplyr::filter(castaway_finish_day == max(castaway_finish_day, na.rm = TRUE)) |>
         dplyr::pull(castaway_name)
     
     last_voted_out
@@ -113,6 +125,8 @@ last_voted_out <- function(szn = default_season()) {
 #' Get Number of Remaining Castaways
 #' 
 #' @param szn Season number
+#' 
+#' @export
 get_castaways_remaining <- function(szn = default_season()) {
     picks <- get_season_picks(szn = szn)
     
