@@ -10,3 +10,4 @@ season_picks <- create_season_picks("googlesheets")
 
 # run app
 survivor_app()
+# shiny::runApp()
