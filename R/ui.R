@@ -79,8 +79,8 @@ ui <- function(input) {
                     shiny::img(
                         src = "jeff-probst-surprised.gif",
                         align = "center",
-                        height = "450px",
-                        width = "600px"
+                        height = "80%",
+                        width = "80%"
                     ),
                     style = "text-align: center;"
                 )
