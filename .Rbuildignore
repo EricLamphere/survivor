@@ -5,4 +5,5 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^\.secrets$
-^R/global\.R$
+^global\.R$
+^app\.R$

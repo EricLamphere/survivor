@@ -5,7 +5,7 @@
 #' Starts the survivor app
 #' 
 #' @export
-run_app <- function() {
+survivor_app <- function() {
     shiny::shinyApp(
         ui = ui, 
         server = server
