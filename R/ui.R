@@ -100,7 +100,7 @@ ui <- function(input) {
                     shinydashboard::infoBoxOutput("castaways_remaining_box")
                 ),
                 shiny::h2("Standings"),
-                formattable::formattableOutput("formatted_picks_table", width = "900px")
+                DT::dataTableOutput("formatted_picks_table", width = "900px")
             )
         )
     )

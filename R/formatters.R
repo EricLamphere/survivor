@@ -92,7 +92,15 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
             )
         )
     
-    formatted
+    formattable::as.datatable(
+        formatted,
+        escape = FALSE,
+        options = list(
+            scrollX = TRUE, 
+            iDisplayLength = 25
+        ),
+        rownames = FALSE
+    )
 }
 
 

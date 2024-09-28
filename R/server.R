@@ -23,13 +23,13 @@ server <- function(input, output) {
     })
     
     # Outputs ----
-    output$formatted_picks_table <- formattable::renderFormattable({
-        format_picks_table(
+    output$formatted_picks_table <- DT::renderDataTable(
+        expr = format_picks_table(
             szn = season_input(),
             picks_only = picks_only_input(),
             search = search_input()
         )
-    })
+    )
     
     output$last_voted_out_box <- shinydashboard::renderInfoBox({
         shinydashboard::infoBox(
