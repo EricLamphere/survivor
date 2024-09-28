@@ -18,7 +18,10 @@ Imports:
     cli,
     googlesheets4,
     emoji,
-    crayon
+    crayon,
+    purrr,
+    tibble,
+    yaml
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LazyData: true

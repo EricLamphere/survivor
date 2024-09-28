@@ -5,6 +5,8 @@
 #' 
 #' @param input List of inputs
 #' @param output List of outputs
+#' 
+#' @export
 server <- function(input, output) {
     
     # Inputs ----

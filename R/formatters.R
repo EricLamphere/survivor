@@ -8,6 +8,8 @@
 #' @param picks_only Logical, whether or not to only show castaways that have 
 #'  been picked by a contestant
 #' @param search Character, text used to search the names of castaways
+#' 
+#' @export
 format_picks_table <- function(szn = default_season(), picks_only = FALSE, search = "Everyone") {
     picks <- get_season_picks(szn = szn, picked = picks_only)
     
@@ -103,6 +105,8 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE, searc
 #' @param condition The condition to be evaluated to determine which color to use
 #' @param color_yes If the condition evaluates to TRUE, use this color
 #' @param color_no If the condition evaluates to FALSE, use this color
+#' 
+#' @export
 picks_formatter <- function(condition, color_yes = "green", color_no = "black") {
     condition <- substitute(condition)
     formattable::formatter(

@@ -79,15 +79,15 @@ castaways:
         full_name: Ben Katzman
         finish:
             day: 26
-            finalist: 3
+            tie_breaker: 3
     charlie:
         full_name: Charlie Davis
         finish:
             day: 26
-            finalist: 2
+            tie_breaker: 2
     kenzie:
         full_name: Kenzie Petty
         finish:
             day: 26
-            finalist: 1
+            tie_breaker: 1
 
