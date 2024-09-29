@@ -50,12 +50,9 @@ ui <- function(input) {
             shinydashboard::tabItem(
                 "welcome",
                 shiny::h2("Welcome!"),
-                shiny::p(
-                    "Welcome! This site is still in development so bear with me as I get things up and running. 
-                    The plan is to use this site as a one stop shop for everything related to the survivor pool.
-                    
-                    "
-                ),
+                shiny::p(glue::glue(
+                    "This is the site for all things related to our survivor pool. Read the rules below, pick your castaway, and win some {paste0(rep(emoji::emoji('money_with_wings'), 3), collapse = '')}!"
+                )),
                 shiny::br(),
                 shiny::h2("Rules"),
                 shiny::tags$li("Everyone picks a player at the end of the first episode"),
@@ -68,6 +65,28 @@ ui <- function(input) {
                 shiny::tags$li("The loser pays $1 per day for each additional day the winner lasted compared to the player they chose"),
                 shiny::tags$li("If the winners player is the sole survivor, then each loser must pay an additional $5 to the winner"),
                 shiny::tags$li("If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season"),
+                shiny::br(),
+                shiny::h2("Layout"),
+                shiny::h4("Welcome"),
+                shiny::tags$li("The welcome page for the site (what you're reading right now)"),
+                shiny::tags$li("Rules for the pool - read these!"),
+                shiny::h4("Standings"),
+                shiny::tags$li("Tiles with information relevant to the last episode and a link to the current seasons wiki page"),
+                shiny::tags$li("A searchable table with all time up to date standings"),
+                shiny::tags$ul(
+                    shiny::tags$li("Includes all of our picks and how much you owe (or won) at the end of the season"),
+                    shiny::tags$li("Full historical data back through season 1")
+                ),
+                shiny::h4("More to come..."),
+                shiny::p("Here are a few things I'm planning on adding that haven't made it in yet"),
+                shiny::tags$li("A new tab showing some stats on participants and how we've done over time"),
+                shiny::tags$ul(
+                    shiny::tags$li("Winners board"),
+                    shiny::tags$li("Cash payout by season"),
+                    shiny::tags$li("etc."),
+                ),
+                shiny::tags$li("Pictures of castaways in the current season"),
+                shiny::tags$li("A system for picking castaways"),
                 shiny::br(),
                 shiny::h2("Enjoy!"),
                 shiny::p(

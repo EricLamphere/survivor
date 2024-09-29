@@ -42,7 +42,7 @@ server <- function(input, output) {
     
     output$last_voted_out_box <- shinydashboard::renderInfoBox({
         shinydashboard::infoBox(
-            "Last voted out", 
+            "Voted out", 
             last_voted_out(szn = season_input()), 
             icon = shiny::icon("user"),
             color = "red"

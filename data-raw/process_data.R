@@ -6,6 +6,7 @@ library(dplyr)
 library(purrr)
 library(ezextras)
 library(survivoR)
+library(snakecase)
 
 # FUNCTIONS ----
 #' Get Historical Castaway Data
