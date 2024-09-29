@@ -44,15 +44,57 @@ ui <- function(input) {
     
     body <- shinydashboard::dashboardBody(
         theme = bslib::bs_theme(bootswatch = "darkly"),
+        # shinyWidgets::setBackgroundImage(
+        #     src = "survivor-logo.png",
+        #     shinydashboard = TRUE
+        # ),
         
         shinydashboard::tabItems(
             # WELCOME
             shinydashboard::tabItem(
                 "welcome",
+                # shiny::titlePanel(
+                #     shiny::fluidRow(
+                #         shiny::column(
+                #             9, 
+                #             shiny::h2("Welcome!")
+                #         ),
+                #         shiny::column(
+                #             3,
+                #             shiny::div(
+                #                 shiny::img(
+                #                     src = "survivor-logo.png",
+                #                     align = "right",
+                #                     height = "100px",
+                #                     width = "150px", 
+                #                     position = "relative"
+                #                 ),
+                #                 style = "display: inline-block;
+                #                         position: relative;"
+                #             )
+                #         )
+                #     )
+                # ),
+                shiny::div(
+                    shiny::img(
+                        src = "survivor-logo.png",
+                        align = "right",
+                        height = "35%",
+                        width = "35%"
+                    ),
+                    style = "display: inline-block; position:absolute; right:90px; size: relative"
+                ),
+                shiny::br(),
                 shiny::h2("Welcome!"),
-                shiny::p(glue::glue(
-                    "This is the site for all things related to our survivor pool. Read the rules below, pick your castaway, and win some {paste0(rep(emoji::emoji('money_with_wings'), 3), collapse = '')}!"
-                )),
+                shiny::column(
+                    9,
+                    shiny::p(glue::glue(
+                        "This is the site for all things related to our survivor pool. Read the rules below, pick your castaway, and win some {paste0(rep(emoji::emoji('money_with_wings'), 3), collapse = '')}!"
+                    ))
+                ),
+                shiny::column(3, ""),
+                shiny::br(),
+                shiny::br(),
                 shiny::br(),
                 shiny::h2("Rules"),
                 shiny::tags$li("Everyone picks a player at the end of the first episode"),
