@@ -95,6 +95,7 @@ ui <- function(input) {
                     shinydashboard::infoBoxOutput("castaways_remaining_box"),
                     shinydashboard::infoBoxOutput("season_wiki_box")
                 ),
+                shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
                 shiny::fluidRow(
                     shiny::tags$style(
                         '#standings :is(th, td) {padding: 0;}'

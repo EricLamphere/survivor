@@ -19,11 +19,25 @@ server <- function(input, output) {
     })
     
     # Outputs ----
-    output$formatted_picks_table <- DT::renderDataTable(
-        expr = format_picks_table(
-            szn = season_input(),
-            picks_only = picks_only_input()
+    refresh_data <- shiny::reactive({
+        counter <<- counter + 1
+        if (counter > 1) {
+            season_picks <<- create_season_picks("googlesheets")
+        }
+    }) %>%
+        shiny::bindEvent(
+            input$refresh_data,
+            ignoreNULL = FALSE
         )
+    
+    output$formatted_picks_table <- DT::renderDataTable(
+        expr = {
+            refresh_data()
+            format_picks_table(
+                szn = season_input(),
+                picks_only = picks_only_input()
+            )  
+        }
     )
     
     output$last_voted_out_box <- shinydashboard::renderInfoBox({
