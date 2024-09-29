@@ -67,6 +67,9 @@ ui <- function(input) {
                 shiny::tags$li("If two players survivors are voted off the same day, the player who picked first in the current season will pick second in the following season"),
                 shiny::br(),
                 shiny::h2("Layout"),
+                shiny::p("You should see a little hamburger menu in the top left. Click on that menu and a side panel 
+                         should appear with a few different tabs you can click on. See below for a short description 
+                         on what you can expect from each tab"),
                 shiny::h4("Welcome"),
                 shiny::tags$li("The welcome page for the site (what you're reading right now)"),
                 shiny::tags$li("Rules for the pool - read these!"),
@@ -88,12 +91,29 @@ ui <- function(input) {
                 shiny::tags$li("Pictures of castaways in the current season"),
                 shiny::tags$li("A system for picking castaways"),
                 shiny::br(),
-                shiny::h2("Enjoy!"),
+                shiny::h2("Developer Notes"),
                 shiny::p(
                     "Please let me know if you have any trouble with the website. I'll 
                     be adding features and refining the design over time to expand 
-                    functionality and improve your experience"
+                    functionality and improve your experience. Here are a few things to
+                    keep in mind if you notice any funkiness while using the site:"
                 ),
+                shiny::tags$li("This site was built on completely open source code, so everything was free.
+                               The server I'm using is free too, and everything free comes with some limitations:"),
+                shiny::tags$ul(
+                    shiny::tags$li("The server only has 25 hours of uptime per month and will go down
+                                   If we exceed that limit. If that happens, I can send updates manually from my 
+                                   local version if needed"),
+                    shiny::tags$li("The server has memory and CPU usage limits which restricts what we can
+                                   do with the app (e.g. storing pictures of castaways for more than 1 season)"),
+                ),
+                shiny::tags$li("I use Google Sheets for storing data about castaways and picks. 
+                               In order for the site to stay up to date with the most recent data, I need
+                               to use the Google Sheets API to query data at load time. This API is fairly stable, 
+                               but it's easy to throttle and sometimes fails a few times before succeeding. 
+                               If you're noticing slow load times, that's probably why"),
+                shiny::br(),
+                shiny::h2("Enjoy!"),
                 shiny::div(
                     shiny::img(
                         src = "jeff-probst-surprised.gif",
