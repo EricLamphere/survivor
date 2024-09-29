@@ -33,14 +33,93 @@ gs_get_srvivor_data <- function(tab_name) {
 }
 
 
+
+#' Process Seasons Table
+#' 
+#' Creates the base season picks table using either the data in googlesheets
+#' or the config files
+#' 
+#' @param using Either googlesheets or configs
+#' @param config_path Path to the config files
+#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
+process_seasons <- function(using = c("googlesheets", "configs"), 
+                            config_path = "data-raw/configs",
+                            deauth_mode = FALSE) {
+    using <- match.arg(using)
+    
+    switch(
+        using,
+        googlesheets = .process_seasons__googlesheets(deauth_mode = deauth_mode),
+        configs = .process_seasons__configs(config_path = config_path)
+    )
+}
+
+
+#' Process All Seasons Using Google Sheets
+#' 
+#' Process the data in the survivor Google Sheet
+#' 
+#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
+.process_seasons__googlesheets <- function(deauth_mode = FALSE) {
+    gs_auth(deauth_mode = deauth_mode)
+    participants <- gs_get_srvivor_data("participants")
+    castaways <- gs_get_srvivor_data("castaways")
+    picks <- gs_get_srvivor_data("picks")
+    seasons <- gs_get_srvivor_data("seasons")
+    
+    castaways |>
+        dplyr::left_join(picks, by = c("season", "castaway_id")) |>
+        dplyr::left_join(participants, by = c("participant_id")) |>
+        dplyr::left_join(seasons, by = c("season")) |>
+        dplyr::rename(
+            season_cost_per_day = cost_per_day, 
+            season_sole_survivor_bonus = sole_survivor_bonus
+        ) |>
+        dplyr::select(dplyr::starts_with("season"), dplyr::starts_with("participant"), dplyr::starts_with("castaway"))
+}
+
+
+
+
+
+#' Process All Seasons Using Configs
+#' 
+#' Process each seasons config file with `process_season_config` and bind
+#' all seasons together
+#' 
+#' @param config_path Path to the config files, defaults to the right path
+.process_seasons__configs <- function(config_path = "data-raw/configs") {
+    seasons_config_path <- config_path %//% "seasons"
+    castaway_files <- list.files(seasons_config_path, recursive = TRUE)
+    
+    pool_party <- yaml::read_yaml(config_path %//% "pool_party.yml")
+    participants <- pool_party$participants
+    participants_lookup <- 
+        purrr::imap_dfr(
+            participants,
+            ~ tibble::tibble(
+                participant_id = .y,
+                participant_first = .x$first,
+                participant_last = .x$last
+            )
+        )
+    
+    season_picks <- purrr::map_dfr(
+        castaway_files, 
+        ~ process_season_config(
+            config = yaml::read_yaml(file.path(seasons_config_path , .x)),
+            participants = participants_lookup
+        )
+    )
+}
+
+
 #' Process Season Config
 #' 
 #' Process season config into a data frame
 #' 
 #' @param config Season config file parsed using `yaml::read_yaml`
 #' @param participants Config file of participants in the pool parsed using `yaml::read_yaml`
-#' 
-#' @export
 process_season_config <- function(config, participants) {
     season <- config$season
     cost_per_day <- config$cost_per_day
@@ -89,85 +168,6 @@ process_season_config <- function(config, participants) {
         )
     
     dplyr::bind_rows(combined, not_picked)
-}
-
-
-#' Process All Seasons Using Configs
-#' 
-#' Process each seasons config file with `process_season_config` and bind
-#' all seasons together
-#' 
-#' @param config_path Path to the config files, defaults to the right path
-.process_seasons__configs <- function(config_path = "data-raw/configs") {
-    seasons_config_path <- config_path %//% "seasons"
-    castaway_files <- list.files(seasons_config_path, recursive = TRUE)
-    
-    pool_party <- yaml::read_yaml(config_path %//% "pool_party.yml")
-    participants <- pool_party$participants
-    participants_lookup <- 
-        purrr::imap_dfr(
-            participants,
-            ~ tibble::tibble(
-                participant_id = .y,
-                participant_first = .x$first,
-                participant_last = .x$last
-            )
-        )
-    
-    season_picks <- purrr::map_dfr(
-        castaway_files, 
-        ~ process_season_config(
-            config = yaml::read_yaml(file.path(seasons_config_path , .x)),
-            participants = participants_lookup
-        )
-    )
-}
-
-
-#' Process All Seasons Using Google Sheets
-#' 
-#' Process the data in the survivor Google Sheet
-#' 
-#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
-.process_seasons__googlesheets <- function(deauth_mode = FALSE) {
-    gs_auth(deauth_mode = deauth_mode)
-    participants <- gs_get_srvivor_data("participants")
-    castaways <- gs_get_srvivor_data("castaways")
-    picks <- gs_get_srvivor_data("picks")
-    seasons <- gs_get_srvivor_data("seasons")
-    
-    castaways |>
-        dplyr::left_join(picks, by = c("season", "castaway_id")) |>
-        dplyr::left_join(participants, by = c("participant_id")) |>
-        dplyr::left_join(seasons, by = c("season")) |>
-        dplyr::rename(
-            season_cost_per_day = cost_per_day, 
-            season_sole_survivor_bonus = sole_survivor_bonus
-        ) |>
-        dplyr::select(dplyr::starts_with("season"), dplyr::starts_with("participant"), dplyr::starts_with("castaway"))
-}
-
-
-#' Process Seasons Table
-#' 
-#' Creates the base season picks table using either the data in googlesheets
-#' or the config files
-#' 
-#' @param using Either googlesheets or configs
-#' @param config_path Path to the config files
-#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
-#' 
-#' @export
-process_seasons <- function(using = c("googlesheets", "configs"), 
-                            config_path = "data-raw/configs",
-                            deauth_mode = FALSE) {
-    using <- match.arg(using)
-    
-    switch(
-        using,
-        googlesheets = .process_seasons__googlesheets(deauth_mode = deauth_mode),
-        configs = .process_seasons__configs(config_path = config_path)
-    )
 }
 
 
@@ -278,14 +278,36 @@ calculate_participant_fields <- function(seasons_tbl) {
 #' 
 #' @param season_picks Season picks table after processing is applied
 cleanup_season_picks <- function(season_picks) {
-    season_picks |>
-        dplyr::arrange(dplyr::desc(season)) |>
+    columns_cleaned <-
+        season_picks |>
         dplyr::select(
             season,
             dplyr::starts_with("participant_"),
             dplyr::starts_with("castaway_"),
             sole_survivor
-        )
+        ) |> 
+        dplyr::arrange(desc(season), castaway_finish_placement, castaway_id)
+    
+    not_ranked <- dplyr::filter(columns_cleaned, is.na(castaway_finish_placement))
+    ranked <- dplyr::filter(columns_cleaned, !is.na(castaway_finish_placement))
+    
+    
+    dplyr::bind_rows(
+        not_ranked,
+        ranked
+    ) |> 
+        dplyr::arrange(desc(season))
+}
+
+
+#' Add Historical Data
+#' 
+#' @param picks Picks data from recent seasons
+add_historical_data <- function(picks) {
+    dplyr::bind_rows(
+        picks,
+        dplyr::filter(historical_castaways, season < min(picks$season))
+    )
 }
 
 
@@ -296,11 +318,14 @@ cleanup_season_picks <- function(season_picks) {
 #' @param using Either googlesheets or configs
 #' @param config_path Path to the config files, defaults to the right path
 #' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
+#' @param augment_with_historical Logical, whether or not to add historical data.
+#'  See `?historical_data` for more info
 #' 
 #' @export
 create_season_picks <- function(using = c("googlesheets", "configs"), 
                                 config_path = "data-raw/configs",
-                                deauth_mode = FALSE) {
+                                deauth_mode = FALSE,
+                                augment_with_historical = TRUE) {
     using <- match.arg(using)
     seasons_tbl <- process_seasons(
         using = using,
@@ -308,8 +333,14 @@ create_season_picks <- function(using = c("googlesheets", "configs"),
         deauth_mode = deauth_mode
     )
     
-    seasons_tbl |>
+    picks <- 
+        seasons_tbl |>
         calculate_castaway_fields() |>
-        calculate_participant_fields() |>
-        cleanup_season_picks()
+        calculate_participant_fields()
+    
+    if (augment_with_historical) {
+        picks <- add_historical_data(picks)
+    }
+    
+    cleanup_season_picks(picks)
 }

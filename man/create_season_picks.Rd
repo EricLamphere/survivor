@@ -7,7 +7,8 @@
 create_season_picks(
   using = c("googlesheets", "configs"),
   config_path = "data-raw/configs",
-  deauth_mode = FALSE
+  deauth_mode = FALSE,
+  augment_with_historical = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,9 @@ create_season_picks(
 \item{config_path}{Path to the config files, defaults to the right path}
 
 \item{deauth_mode}{Whether or not to authenticate with Google Sheets in deauth mode}
+
+\item{augment_with_historical}{Logical, whether or not to add historical data.
+See \code{?historical_data} for more info}
 }
 \description{
 Main method for creating the season picks table with all transformations applied
