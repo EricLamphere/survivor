@@ -31,7 +31,8 @@ ui <- function(input) {
                     "season", 
                     "Season", 
                     choices = c(all_seasons_label(), list_seasons()),
-                    selected = default_season()
+                    selected = default_season(), 
+                    selectize = FALSE
                 ),
                 shiny::checkboxInput(
                     "picks_only",
