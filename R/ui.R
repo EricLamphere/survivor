@@ -1,5 +1,8 @@
 
 
+
+
+
 #' App UI
 #'
 #' UI of the survivor app
@@ -32,13 +35,18 @@ ui <- function(input) {
                     "Season", 
                     choices = c(all_seasons_label(), list_seasons()),
                     selected = default_season(), 
-                    selectize = FALSE
+                    # selector looks better with this set to TRUE, but works better on mobile with FALSE
+                    selectize = FALSE 
                 ),
                 shiny::checkboxInput(
                     "picks_only",
                     shiny::tags$b("Only show our picks"),
                     value = FALSE
                 )
+            ),
+            shinydashboard::menuItem(
+                glue::glue("Winners Club {emoji::emoji('star')}"), 
+                tabName = "winners"
             )
         )
     )
@@ -172,6 +180,16 @@ ui <- function(input) {
             shinydashboard::tabItem(
                 "standings",
                 shiny::h2("Last Week on Survivor"),
+                shiny::fluidRow(
+                    shiny::conditionalPanel(
+                        condition = 'output.pool_winner_exists',
+                        shinydashboard::infoBoxOutput("pool_winner_box", width = 6)
+                    ),
+                    shiny::conditionalPanel(
+                        condition = 'output.sole_survivor_exists',
+                        shinydashboard::infoBoxOutput("sole_survivor_box", width = 6)
+                    )
+                ),
                 shiny::fluidRow(
                     shinydashboard::infoBoxOutput("last_voted_out_box"),
                     shinydashboard::infoBoxOutput("castaways_remaining_box"),

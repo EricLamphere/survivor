@@ -29,6 +29,21 @@ all_seasons_label <- function() {
     "All Seasons"
 }
 
+
+#' Get Season Number
+#' 
+#' If all seasons are specified, then choose the default season
+#' 
+#' @param szn Season number
+force_season_number <- function(szn = default_season()) {
+    if (szn == all_seasons_label()) {
+        szn <- default_season()
+    }
+    
+    szn
+}
+
+
 #' List Season Castaways
 #' 
 #' List castaways for a given season
@@ -138,11 +153,52 @@ get_castaways_remaining <- function(szn = default_season()) {
 #' 
 #' @param szn Season number
 make_season_wiki_link <- function(szn = default_season()) {
-    if (szn == all_seasons_label()) {
-        szn <- default_season()
-    }
+    szn <- force_season_number()
     paste0("https://en.wikipedia.org/wiki/Survivor_", szn)
 }
+
+
+
+#' Get Season Pool Winner
+#' 
+#' @param szn Season number. If all seasons specified, returns default season
+#' 
+#' @return Named vector where name is the participant and value is their pick
+get_pool_winner <- function(szn = default_season()) {
+    szn <- force_season_number(szn)
+    season_picks <- get_season_picks(szn)
+    
+    if (!any(season_picks$participant_rank == 1, na.rm = TRUE)) {
+        return(NULL)
+    }
+    
+    season_picks |> 
+        dplyr::filter(participant_rank == 1) |> 
+        dplyr::pull(castaway_name, participant_full_name)
+}
+
+
+
+#' Get Season Sole Survivor
+#' 
+#' @param szn Season number. If all seasons specified, returns default season
+get_sole_survivor <- function(szn = default_season()) {
+    szn <- force_season_number(szn)
+    season_picks <- get_season_picks(szn)
+    
+    if (!any(season_picks$sole_survivor, na.rm = TRUE)) {
+        return(NULL)
+    }
+    
+    season_picks |> 
+        dplyr::filter(sole_survivor) |> 
+        dplyr::pull(castaway_name)
+}
+
+
+
+
+
 
 
 

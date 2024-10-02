@@ -80,15 +80,11 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     display_fields_added <- 
         picks |>
         dplyr::mutate(
-            participant_last = dplyr::case_when(
-                participant_last == "last_name_unknown" ~ NA_character_,
-                TRUE ~ participant_last
-            ),
             Season = season,
             Participant = ifelse(
                 !is.na(participant_winner) & participant_winner,
-                glue::glue("{emoji::emoji('star')} {trimws(participant_first %&% ' ' %&% participant_last)} {emoji::emoji('star')}"),
-                trimws(participant_first %&% " " %&% participant_last)
+                glue::glue("{emoji::emoji('star')} {participant_full_name} {emoji::emoji('star')}"),
+                participant_full_name
             ),
             `Pool Rank` = scales::ordinal(participant_rank),
             Castaway = ifelse(

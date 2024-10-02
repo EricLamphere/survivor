@@ -202,7 +202,9 @@ calculate_castaway_fields <- function(seasons_tbl) {
 #' @param seasons_tbl Seasons table obtained from `process_seasons` and 
 #' processed by `calculate_castaway_fields`
 calculate_participant_fields <- function(seasons_tbl) {
-    picked <- dplyr::filter(seasons_tbl, !is.na(participant_id))
+    picked <- 
+        dplyr::filter(seasons_tbl, !is.na(participant_id)) |> 
+        .process_participant_name()
     unpicked <- dplyr::filter(seasons_tbl, is.na(participant_id))
     
     payments_applied <- 
@@ -267,6 +269,18 @@ calculate_participant_fields <- function(seasons_tbl) {
     picks |>
         dplyr::mutate(
             participant_rank = dplyr::if_else(is.na(castaway_finish_placement), NA, 1 + n_participants - rank(castaway_finish_day))
+        )
+}
+
+
+.process_participant_name <- function(picks) {
+    picks |> 
+        dplyr::mutate(
+            participant_last = dplyr::case_when(
+                participant_last == "last_name_unknown" ~ NA_character_,
+                TRUE ~ participant_last
+            ),
+            participant_full_name = trimws(participant_first %&% ' ' %&% participant_last)
         )
 }
 

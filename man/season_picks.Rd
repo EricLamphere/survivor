@@ -11,6 +11,7 @@ A data frame with 72 rows and 13 variables:
 \item{\code{participant_id}}{character The ID for the participant in the pool}
 \item{\code{participant_first}}{character First name of the participant in the pool}
 \item{\code{participant_last}}{character Last name of the participant in the pool}
+\item{\code{participant_full_name}}{character First and last name of the participant in the pool}
 \item{\code{participant_winner}}{logical Whether or not the participant won the pool}
 \item{\code{participant_payment}}{integer The amount of money owed for the losers, or the amount of money won by the winner}
 \item{\code{participant_rank}}{double Rank based on whos castaway lasted the longest}
