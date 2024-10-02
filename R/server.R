@@ -97,7 +97,7 @@ server <- function(input, output) {
         shinydashboard::infoBox(
             glue::glue("Season {force_season_number(season_input())} pool winner"), 
             glue::glue("{emoji::emoji('star')} {pool_winner} {emoji::emoji('star')}"),
-            subtitle = paste0("   ", winner_pick),
+            subtitle = paste0(winner_pick),
             icon = shiny::icon("star"),
             color = "green"
         )

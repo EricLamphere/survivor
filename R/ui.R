@@ -59,31 +59,9 @@ ui <- function(input) {
         # ),
         
         shinydashboard::tabItems(
-            # WELCOME
+            # WELCOME ----
             shinydashboard::tabItem(
                 "welcome",
-                # shiny::titlePanel(
-                #     shiny::fluidRow(
-                #         shiny::column(
-                #             9, 
-                #             shiny::h2("Welcome!")
-                #         ),
-                #         shiny::column(
-                #             3,
-                #             shiny::div(
-                #                 shiny::img(
-                #                     src = "survivor-logo.png",
-                #                     align = "right",
-                #                     height = "100px",
-                #                     width = "150px", 
-                #                     position = "relative"
-                #                 ),
-                #                 style = "display: inline-block;
-                #                         position: relative;"
-                #             )
-                #         )
-                #     )
-                # ),
                 shiny::div(
                     shiny::img(
                         src = "survivor-logo.png",
@@ -176,7 +154,7 @@ ui <- function(input) {
                 )
             ),
             
-            # PICKS
+            # PICKS ----
             shinydashboard::tabItem(
                 "standings",
                 shiny::h2("Last Week on Survivor"),
@@ -211,6 +189,12 @@ ui <- function(input) {
                         width = "80%"
                     )
                 )
+            ),
+            
+            # WINNERS CLUB ----
+            shinydashboard::tabItem(
+                "winners",
+                shiny::p("coming soon...")
             )
         )
     )
