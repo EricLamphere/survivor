@@ -92,7 +92,7 @@ server <- function(input, output) {
         pool_winner <- names(pool_winner_pick)
         sole_survivor <- sole_survivor()
         if (!is.null(sole_survivor) && !is.null(pool_winner_pick) && pool_winner_pick == sole_survivor) {
-            winner_pick <- glue::glue("{emoji::emoji('tada')} {winner_pick} {emoji::emoji('tada')}")
+            winner_pick <- glue::glue("{emoji::emoji('tada')} {winner_pick} {emoji::emoji('tada')} -- Sole survivor bonus!!")
         }
         shinydashboard::infoBox(
             glue::glue("Season {force_season_number(season_input())} pool winner"), 

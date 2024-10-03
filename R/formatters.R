@@ -60,7 +60,7 @@ get_column_formats <- function(data) {
 
 #' Format Season Picks Table
 #' 
-#' Selects, renames, and formats relevant columns for the app
+#' Formats data for the UI picks table
 #' 
 #' @param szn Season number. Defaults to `default_season()`
 #' @param picks_only Logical, whether or not to only show castaways that have 
@@ -68,13 +68,41 @@ get_column_formats <- function(data) {
 #' 
 #' @export
 format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
+    picks_data <- .picks_table__base_data(szn = szn, picks_only = picks_only)
+    
+    formatted <-
+        picks_data |>
+        formattable::formattable(
+            get_column_formats(picks_data)
+        )
+    
+    formattable::as.datatable(
+        formatted,
+        escape = FALSE,
+        options = list(
+            scrollX = TRUE, 
+            iDisplayLength = 25
+        ),
+        rownames = FALSE
+    )
+}
+
+
+#' Base Data for Season Picks Table
+#' 
+#' Cleans up columns in season_picks table in preparation for formatting
+#' 
+#' @param szn Season number. Defaults to `default_season()`
+#' @param picks_only Logical, whether or not to only show castaways that have 
+#'  been picked by a contestant
+.picks_table__base_data <- function(szn = default_season(), picks_only = FALSE) {
     picks <- get_season_picks(szn = szn, picked = picks_only)
     
     # data driven flags
     show_participant_fields <- any(!is.na(picks$participant_id))
     show_money_fields <- all(!is.na(
         dplyr::filter(picks, !is.na(participant_id)) |> 
-            dplyr::pull(castaway_finish_day)
+            dplyr::pull(castaway_day)
     ))
     
     display_fields_added <- 
@@ -92,8 +120,8 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
                 glue::glue("{emoji::emoji('star')} {castaway_name} {emoji::emoji('star')}"),
                 castaway_name
             ),
-            `Day Voted Out` = castaway_finish_day,
-            `Castaway Rank` = scales::ordinal(castaway_finish_placement),
+            `Day Voted Out` = castaway_day,
+            `Castaway Rank` = scales::ordinal(castaway_rank),
             `Sole Survivor` = dplyr::case_when(
                 sole_survivor ~ glue::glue("{emoji::emoji('tada')} WINNER {emoji::emoji('tada')}"),
                 !is.na(`Day Voted Out`) ~ glue::glue("{emoji::emoji('x')}"),
@@ -120,8 +148,7 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     
     
     # clean and format
-    final_cleaning <-
-        display_fields_added |>
+    display_fields_added |>
         dplyr::mutate(
             dplyr::across(
                 dplyr::everything(),
@@ -129,22 +156,36 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
             )
         ) |>
         dplyr::select(-dplyr::any_of(colnames(season_picks))) # remove non-display columns
+}
+
+
+
+
+format_winners_data <- function() {
+    winners <- .winners_widgets__base_data()
     
-    formatted <-
-        final_cleaning |>
-        formattable::formattable(
-            get_column_formats(final_cleaning)
-        )
+    winners
+}
+
+
+#' Format Winners Data
+#' 
+#' Gets table of winners and summarizes it for use by `format_winners_data`
+.winners_widgets__base_data <- function() {
+    winners <- get_pool_winners_table()
     
-    formattable::as.datatable(
-        formatted,
-        escape = FALSE,
-        options = list(
-            scrollX = TRUE, 
-            iDisplayLength = 25
-        ),
-        rownames = FALSE
-    )
+    winners_summarized <-
+        winners |> 
+        dplyr::group_by(participant_id, participant_full_name) |> 
+        dplyr::summarise(
+            n_seasons_won = dplyr::n(),
+            `Money Won` = sum(participant_payment),
+            `Seasons Won` = paste0(season, collapse = ", "),
+            `Sole Survivor Picks` = sum(sole_survivor, na.rm = TRUE),
+            .groups = "keep"
+        ) |> 
+        dplyr::ungroup() |> 
+        dplyr::arrange(desc(n_seasons_won), desc(`Money Won`))
 }
 
 

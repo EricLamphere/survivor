@@ -95,7 +95,7 @@ get_season_picking_order <- function(szn = default_season()) {
     }
     
     get_season_picks(szn = last_szn, picked = TRUE) |>
-        dplyr::arrange(desc(castaway_finish_placement)) |>
+        dplyr::arrange(desc(castaway_rank)) |>
         dplyr::distinct(participant_id) |>
         dplyr::pull(participant_id)
 }
@@ -122,7 +122,7 @@ last_voted_out <- function(szn = default_season()) {
     if (all(picks$castaway_eliminated)) {
         runners_up <- 
             picks |>
-            dplyr::filter(castaway_finish_placement %in% c(2, 3)) |>
+            dplyr::filter(castaway_rank %in% c(2, 3)) |>
             dplyr::pull(castaway_name)
         
         return(paste(runners_up, collapse = " and "))
@@ -131,7 +131,7 @@ last_voted_out <- function(szn = default_season()) {
     last_voted_out <- 
         picks |>
         dplyr::filter(season == max(season)) |>
-        dplyr::filter(castaway_finish_day == max(castaway_finish_day, na.rm = TRUE)) |>
+        dplyr::filter(castaway_day == max(castaway_day, na.rm = TRUE)) |>
         dplyr::pull(castaway_name)
     
     last_voted_out
@@ -158,41 +158,27 @@ make_season_wiki_link <- function(szn = default_season()) {
 }
 
 
-
-#' Get Season Pool Winner
+#' Filter the season_picks Table
 #' 
-#' @param szn Season number. If all seasons specified, returns default season
+#' Filters the season_picks table based on a set of condiions passed to `dplyr::filter`
 #' 
-#' @return Named vector where name is the participant and value is their pick
-get_pool_winner <- function(szn = default_season()) {
-    szn <- force_season_number(szn)
+#' @param ... Filter conditions, e.g. `castaway_name %~% 'rob'`
+#' @param .szn Season number
+#' 
+#' @return Data frame
+get_pick_data <- function(..., .szn = default_season()) {
+    szn <- force_season_number(.szn)
     season_picks <- get_season_picks(szn)
     
-    if (!any(season_picks$participant_rank == 1, na.rm = TRUE)) {
-        return(NULL)
-    }
-    
-    season_picks |> 
-        dplyr::filter(participant_rank == 1) |> 
-        dplyr::pull(castaway_name, participant_full_name)
-}
-
-
-
-#' Get Season Sole Survivor
-#' 
-#' @param szn Season number. If all seasons specified, returns default season
-get_sole_survivor <- function(szn = default_season()) {
-    szn <- force_season_number(szn)
-    season_picks <- get_season_picks(szn)
-    
-    if (!any(season_picks$sole_survivor, na.rm = TRUE)) {
-        return(NULL)
-    }
-    
-    season_picks |> 
-        dplyr::filter(sole_survivor) |> 
-        dplyr::pull(castaway_name)
+    tryCatch(
+        dplyr::filter(season_picks, ...),
+        error = function(e) {
+            cli::cli_abort(c(
+                "Failed with error: {e}",
+                "Note: available colums are {crayon::cyan(colnames(season_picks))}"
+            ))
+        }
+    )
 }
 
 

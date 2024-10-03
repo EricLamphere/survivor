@@ -146,8 +146,8 @@ process_season_config <- function(config, participants) {
             ~ tibble::tibble(
                 castaway_id = .y,
                 castaway_name = .x$full_name,
-                castaway_finish_day = .x$finish$day %||% NA_integer_,
-                castaway_finish_tie_breaker = .x$finish$tie_breaker %||% NA_integer_
+                castaway_day = .x$finish$day %||% NA_integer_,
+                castaway_tie_breaker = .x$finish$tie_breaker %||% NA_integer_
             )
         )
     
@@ -186,13 +186,13 @@ calculate_castaway_fields <- function(seasons_tbl) {
         dplyr::arrange(dplyr::desc(season)) |>
         dplyr::group_by(season) |>
         dplyr::mutate(
-            castaway_day_with_tie_breaker = dplyr::if_else(is.na(castaway_finish_tie_breaker), castaway_finish_day, castaway_finish_day + 1/(1+castaway_finish_tie_breaker)),
-            castaway_finish_placement = dplyr::if_else(is.na(castaway_day_with_tie_breaker), NA, 1 + dplyr::n() - rank(castaway_day_with_tie_breaker)),
-            castaway_eliminated = dplyr::if_else(!is.na(castaway_finish_day), TRUE, FALSE),
-            sole_survivor = dplyr::if_else(castaway_finish_placement == 1, TRUE, FALSE)
+            castaway_day_with_tie_breaker = dplyr::if_else(is.na(castaway_tie_breaker), castaway_day, castaway_day + 1/(1+castaway_tie_breaker)),
+            castaway_rank = dplyr::if_else(is.na(castaway_day_with_tie_breaker), NA, 1 + dplyr::n() - rank(castaway_day_with_tie_breaker)),
+            castaway_eliminated = dplyr::if_else(!is.na(castaway_day), TRUE, FALSE),
+            sole_survivor = dplyr::if_else(castaway_rank == 1, TRUE, FALSE)
         ) |>
         dplyr::ungroup() |>
-        dplyr::select(-c(castaway_day_with_tie_breaker, castaway_finish_tie_breaker))
+        dplyr::select(-c(castaway_day_with_tie_breaker, castaway_tie_breaker))
 }
 
 #' Calculate Payments & Rank
@@ -229,12 +229,12 @@ calculate_participant_fields <- function(seasons_tbl) {
         return(dplyr::mutate(picks, participant_payment = NA_integer_))
     }
     
-    winner_n_days <- max(picks$castaway_finish_day)
+    winner_n_days <- max(picks$castaway_day)
     season_with_payments <-
         picks |>
         dplyr::mutate(
-            participant_winner = castaway_finish_day == max(castaway_finish_day),
-            participant_payment = season_cost_per_day * (winner_n_days - castaway_finish_day)
+            participant_winner = castaway_day == max(castaway_day),
+            participant_payment = season_cost_per_day * (winner_n_days - castaway_day)
         )
     
     if (any(picks$sole_survivor, na.rm = TRUE)) {
@@ -268,7 +268,7 @@ calculate_participant_fields <- function(seasons_tbl) {
     
     picks |>
         dplyr::mutate(
-            participant_rank = dplyr::if_else(is.na(castaway_finish_placement), NA, 1 + n_participants - rank(castaway_finish_day))
+            participant_rank = dplyr::if_else(is.na(castaway_rank), NA, 1 + n_participants - rank(castaway_day))
         )
 }
 
@@ -300,10 +300,10 @@ cleanup_season_picks <- function(season_picks) {
             dplyr::starts_with("castaway_"),
             sole_survivor
         ) |> 
-        dplyr::arrange(desc(season), castaway_finish_placement, castaway_id)
+        dplyr::arrange(desc(season), castaway_rank, castaway_id)
     
-    not_ranked <- dplyr::filter(columns_cleaned, is.na(castaway_finish_placement))
-    ranked <- dplyr::filter(columns_cleaned, !is.na(castaway_finish_placement))
+    not_ranked <- dplyr::filter(columns_cleaned, is.na(castaway_rank))
+    ranked <- dplyr::filter(columns_cleaned, !is.na(castaway_rank))
     
     
     dplyr::bind_rows(

@@ -27,8 +27,8 @@ pull_historical_castaways <- function(start_season = 43) {
             season,
             castaway_id = snakecase::to_snake_case(castaway),
             castaway_name = full_name,
-            castaway_finish_day = day,
-            castaway_finish_placement = result_number,
+            castaway_day = day,
+            castaway_rank = result_number,
             castaway_eliminated = TRUE,
             sole_survivor = result_number == 1
         ) |>
@@ -40,7 +40,7 @@ pull_historical_castaways <- function(start_season = 43) {
             )
         ) |> 
         dplyr::ungroup() |> 
-        dplyr::arrange(desc(season), desc(castaway_finish_placement))
+        dplyr::arrange(desc(season), desc(castaway_rank))
 }
 
 
