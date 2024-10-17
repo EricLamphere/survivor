@@ -79,9 +79,11 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     formattable::as.datatable(
         formatted,
         escape = FALSE,
+        # options reference: https://datatables.net/reference/option/
         options = list(
             scrollX = TRUE, 
-            iDisplayLength = 25
+            iDisplayLength = 20, # max number of castaways per season
+            lengthMenu = c(10, 20, 50, 100)
         ),
         rownames = FALSE
     )
@@ -104,6 +106,7 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
         dplyr::filter(picks, !is.na(participant_id)) |> 
             dplyr::pull(castaway_day)
     ))
+    show_season_field <- szn == all_seasons_label()
     
     display_fields_added <- 
         picks |>
@@ -117,16 +120,11 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
             `Pool Rank` = scales::ordinal(participant_rank),
             Castaway = ifelse(
                 !is.na(sole_survivor) & sole_survivor, 
-                glue::glue("{emoji::emoji('star')} {castaway_name} {emoji::emoji('star')}"),
+                glue::glue("{emoji::emoji('tada')} {castaway_name} {emoji::emoji('tada')}"),
                 castaway_name
             ),
             `Day Voted Out` = castaway_day,
-            `Castaway Rank` = scales::ordinal(castaway_rank),
-            `Sole Survivor` = dplyr::case_when(
-                sole_survivor ~ glue::glue("{emoji::emoji('tada')} WINNER {emoji::emoji('tada')}"),
-                !is.na(`Day Voted Out`) ~ glue::glue("{emoji::emoji('x')}"),
-                TRUE ~ NA_character_
-            )
+            `Castaway Rank` = scales::ordinal(castaway_rank)
         )
     
     
@@ -144,6 +142,12 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
         display_fields_added <-
             display_fields_added |> 
             dplyr::select(-dplyr::starts_with('participant_'), -Participant, -`Pool Rank`, -`$$$`)
+    }
+    
+    if (!show_season_field) {
+        display_fields_added <- 
+            display_fields_added |> 
+            dplyr::select(-Season)
     }
     
     
@@ -164,7 +168,23 @@ format_picks_table <- function(szn = default_season(), picks_only = FALSE) {
 format_winners_data <- function() {
     winners <- .winners_widgets__base_data()
     
-    winners
+    purrr::map(
+        split(winners, ~participant_id),
+        ~ .create_winner_tile(.x)
+    )
+}
+
+
+.create_winner_tile <- function(winner_row) {
+    shinydashboard::infoBox(
+        title = winner_row$participant_id,
+        value = winner_row$participant_name,
+        subtitle = glue::glue(
+            "
+            {winner_row$n_seasons_won} seasons won: {winner_row$`Seasons Won`}
+            "
+        )
+    )
 }
 
 

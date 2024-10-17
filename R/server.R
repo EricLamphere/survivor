@@ -25,11 +25,20 @@ server <- function(input, output) {
         if (counter > 1) {
             season_picks <<- create_season_picks("googlesheets")
         }
-    }) %>%
+    }) |> 
         shiny::bindEvent(
             input$refresh_data,
             ignoreNULL = FALSE
         )
+    
+    output$season_label <- shiny::renderText({
+        season <- season_input()
+        if (season == all_seasons_label()) {
+            season
+        } else {
+            paste0("Season ", season)
+        }
+    })
     
     output$formatted_picks_table <- DT::renderDataTable(
         expr = {

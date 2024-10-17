@@ -157,7 +157,8 @@ ui <- function(input) {
             # PICKS ----
             shinydashboard::tabItem(
                 "standings",
-                shiny::h2("Last Week on Survivor"),
+                shiny::h1(shiny::textOutput("season_label")),
+                shiny::h3("Last Week on Survivor"),
                 shiny::fluidRow(
                     shiny::conditionalPanel(
                         condition = 'output.pool_winner_exists',
