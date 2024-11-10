@@ -195,7 +195,15 @@ ui <- function(input) {
             # WINNERS CLUB ----
             shinydashboard::tabItem(
                 "winners",
-                shiny::p("coming soon...")
+                shiny::fluidRow(
+                    ui_create_winners_tiles(),  
+                ),
+                shiny::fluidRow(
+                    shiny::splitLayout(
+                        shiny::plotOutput("gain_loss_plot"),
+                        shiny::plotOutput("season_pots_plot")
+                    )
+                )
             )
         )
     )

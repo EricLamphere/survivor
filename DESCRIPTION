@@ -23,7 +23,8 @@ Imports:
     tibble,
     yaml,
     pkgload,
-    DT
+    DT,
+    ggplot2
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LazyData: true

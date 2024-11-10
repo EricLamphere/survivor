@@ -43,7 +43,7 @@ server <- function(input, output) {
     output$formatted_picks_table <- DT::renderDataTable(
         expr = {
             refresh_data()
-            format_picks_table(
+            ui_create_picks_table(
                 szn = season_input(),
                 picks_only = picks_only_input()
             )  
@@ -108,7 +108,8 @@ server <- function(input, output) {
             glue::glue("{emoji::emoji('star')} {pool_winner} {emoji::emoji('star')}"),
             subtitle = paste0(winner_pick),
             icon = shiny::icon("star"),
-            color = "green"
+            color = "green",
+            fill = TRUE
         )
     })
     
@@ -120,4 +121,10 @@ server <- function(input, output) {
             color = "lime"
         )
     })
+    
+    ## total gain/loss plot ----
+    output$gain_loss_plot <- shiny::renderPlot({ ui_create_gain_loss_plot() })
+    
+    ## season pots plot ----
+    output$season_pots_plot <- shiny::renderPlot({ ui_create_season_pots_plot() })
 }
