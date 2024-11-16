@@ -33,10 +33,10 @@ jobs:
             - uses: actions/checkout@v2
             - uses: r-lib/actions/setup-r@master
             - name: Install Packages
-                run: install.packages(c("shiny", "rsconnect"), type = "binary")
-                shell: Rscript {0}
+              run: install.packages(c("shiny", "rsconnect"), type = "binary")
+              shell: Rscript {0}
             - name: Push to shiny.io
-                run: |
-                    Rscript -e "rsconnect::setAccountInfo(name='${{ vars.SHINYAPPS_ACCOUNT_NAME }}', token=${{ secrets.SHINYAPPS_TOKEN }}, secret=${{ secrets.SHINYAPPS_SECRET }})"
-                    Rscript -e "rsconnect::deployApp(appDir = './', appName = 'survivor')"
+              run: |
+                Rscript -e "rsconnect::setAccountInfo(name='${{ vars.SHINYAPPS_ACCOUNT_NAME }}', token=${{ secrets.SHINYAPPS_TOKEN }}, secret=${{ secrets.SHINYAPPS_SECRET }})"
+                Rscript -e "rsconnect::deployApp(appDir = './', appName = 'survivor')"
   
