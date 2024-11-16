@@ -22,7 +22,10 @@
 #           accountToken: ${{ secrets.SHINYAPPS_TOKEN }}
 #           accountSecret: ${{ secrets.SHINYAPPS_SECRET }}
           
-on: [push]
+on: 
+    push:
+        branches:
+            - main
 
 name: Deploy App
 
@@ -43,7 +46,7 @@ jobs:
                 SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
                 SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
                 SHINYAPPS_ACCOUNT_NAME: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
-                APP_NAME: survivor
+                APP_NAME: survivor_dev
               run: |
                 Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), token=Sys.getenv('SHINYAPPS_TOKEN'), secret=Sys.getenv('SHINYAPPS_SECRET'))" 
                 Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'))"
