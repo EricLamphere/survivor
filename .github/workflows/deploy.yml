@@ -49,7 +49,7 @@ jobs:
                 APP_NAME: survivor_dev
               run: |
                 Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), token=Sys.getenv('SHINYAPPS_TOKEN'), secret=Sys.getenv('SHINYAPPS_SECRET'))" 
-                Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'))"
+                Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'), forceUpdate = TRUE)"
   
   
   
