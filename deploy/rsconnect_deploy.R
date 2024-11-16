@@ -1,8 +1,15 @@
 
 
+cli::cli_alert_info("Authenticating with shinyapps.io...")
 rsconnect::setAccountInfo(
-    name = Sys.getenv("RS_CONNECT_ACCOUNT_NAME"), 
-    token = Sys.getenv("RS_CONNECT_TOKEN"),
-    secret = Sys.getenv("RS_CONNECT_SECRET")
+    name = Sys.getenv("SHINYAPPS_ACCOUNT_NAME"), 
+    token = Sys.getenv("SHINYAPPS_TOKEN"),
+    secret = Sys.getenv("SHINYAPPS_SECRET")
 )
-rsconnect::deployApp(appName = "survivor", appDir = "./")
+
+
+cli::cli_alert_info("Authenticating with shinyapps.io...")
+rsconnect::deployApp(
+    appName = "survivor",
+    appDir = "./"
+)
