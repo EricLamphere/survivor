@@ -191,8 +191,7 @@ calculate_castaway_fields <- function(seasons_tbl) {
             castaway_eliminated = dplyr::if_else(!is.na(castaway_day), TRUE, FALSE),
             sole_survivor = dplyr::if_else(castaway_rank == 1, TRUE, FALSE)
         ) |>
-        dplyr::ungroup() |>
-        dplyr::select(-c(castaway_day_with_tie_breaker, castaway_tie_breaker))
+        dplyr::ungroup()
 }
 
 #' Calculate Payments & Rank
@@ -210,8 +209,8 @@ calculate_participant_fields <- function(seasons_tbl) {
     payments_applied <- 
         split(picked, ~season) |>
         purrr::map_dfr(
-            ~ .get_season_payments(picks = .x) |> 
-                .get_participant_rank()
+            ~ .get_participant_rank(picks = .x) |> 
+                .get_season_payments()
         )
     
     dplyr::bind_rows(
@@ -233,7 +232,7 @@ calculate_participant_fields <- function(seasons_tbl) {
     season_with_payments <-
         picks |>
         dplyr::mutate(
-            participant_winner = castaway_day == max(castaway_day),
+            participant_winner = as.integer(participant_rank) == 1,
             participant_payment = season_cost_per_day * (winner_n_days - castaway_day)
         )
     
@@ -268,7 +267,7 @@ calculate_participant_fields <- function(seasons_tbl) {
     
     picks |>
         dplyr::mutate(
-            participant_rank = dplyr::if_else(is.na(castaway_rank), NA, 1 + n_participants - rank(castaway_day))
+            participant_rank = dplyr::if_else(is.na(castaway_day_with_tie_breaker), NA, 1 + n_participants - rank(castaway_day_with_tie_breaker))
         )
 }
 
@@ -300,7 +299,8 @@ cleanup_season_picks <- function(season_picks) {
             dplyr::starts_with("castaway_"),
             sole_survivor
         ) |> 
-        dplyr::arrange(desc(season), castaway_rank, castaway_id)
+        dplyr::arrange(desc(season), castaway_rank, castaway_id) |> 
+        dplyr::select(-c(castaway_day_with_tie_breaker, castaway_tie_breaker))
     
     not_ranked <- dplyr::filter(columns_cleaned, is.na(castaway_rank))
     ranked <- dplyr::filter(columns_cleaned, !is.na(castaway_rank))

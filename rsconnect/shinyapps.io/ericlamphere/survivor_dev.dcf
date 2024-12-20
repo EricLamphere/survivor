@@ -1,0 +1,10 @@
+name: survivor_dev
+title:
+username: ericlamphere
+account: ericlamphere
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13360242
+bundleId: 9373698
+url: https://ericlamphere.shinyapps.io/survivor_dev/
+version: 1

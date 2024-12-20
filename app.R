@@ -8,6 +8,7 @@ library(purrr)
 cli::cli_alert_info("Loading survivor package")
 pkgload::load_all(".")
 
+
 # GLOBALS
 # > I just don't want to refactor everything to take a dataframe input
 counter <<- 0
