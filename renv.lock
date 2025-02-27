@@ -156,7 +156,7 @@
     },
     "bslib": {
       "Package": "bslib",
-      "Version": "0.8.0",
+      "Version": "0.9.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -174,7 +174,7 @@
         "rlang",
         "sass"
       ],
-      "Hash": "b299c6741ca9746fb227debcb0f9fb6c"
+      "Hash": "70a6489cc254171fb9b4a7f130f44dca"
     },
     "cachem": {
       "Package": "cachem",
@@ -214,14 +214,14 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "3.6.3",
+      "Version": "3.6.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
       ],
-      "Hash": "b21916dd77a27642b447374a5d30ecf3"
+      "Hash": "491c34d3d9dd0d2fe13d9f278bb90795"
     },
     "clipr": {
       "Package": "clipr",
@@ -1111,7 +1111,7 @@
     },
     "promises": {
       "Package": "promises",
-      "Version": "1.3.0",
+      "Version": "1.3.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1123,7 +1123,7 @@
         "rlang",
         "stats"
       ],
-      "Hash": "434cd5388a3979e74be5c219bcd6e77d"
+      "Hash": "c84fd4f75ea1f5434735e08b7f50fbca"
     },
     "ps": {
       "Package": "ps",
@@ -1138,7 +1138,7 @@
     },
     "purrr": {
       "Package": "purrr",
-      "Version": "1.0.2",
+      "Version": "1.0.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1149,7 +1149,7 @@
         "rlang",
         "vctrs"
       ],
-      "Hash": "1cba04a4e9414bdefc9dcaa99649a8dc"
+      "Hash": "cc8b5d43f90551fa6df0a6be5d640a4f"
     },
     "rappdirs": {
       "Package": "rappdirs",
@@ -1321,7 +1321,7 @@
     },
     "shiny": {
       "Package": "shiny",
-      "Version": "1.9.1",
+      "Version": "1.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1350,7 +1350,7 @@
         "withr",
         "xtable"
       ],
-      "Hash": "6a293995a66e12c48d13aa1f957d09c7"
+      "Hash": "4b4477baa9a939c5577e5ddb4bf01f28"
     },
     "shinycssloaders": {
       "Package": "shinycssloaders",
@@ -1448,7 +1448,7 @@
     },
     "survivoR": {
       "Package": "survivoR",
-      "Version": "2.3.4",
+      "Version": "2.3.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1468,7 +1468,7 @@
         "stringr",
         "tidyr"
       ],
-      "Hash": "6180cb172adac37df2991fe2d43a4868"
+      "Hash": "36ac64256b040d0bb90f2b7639066deb"
     },
     "sys": {
       "Package": "sys",

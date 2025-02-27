@@ -174,6 +174,27 @@ ui <- function(input) {
                     shinydashboard::infoBoxOutput("castaways_remaining_box"),
                     shinydashboard::infoBoxOutput("season_wiki_box")
                 ),
+                shiny::conditionalPanel(
+                    condition = '!output.season_has_started',
+                    shiny::fluidRow(
+                        shiny::column(
+                            width = 6,
+                            shiny::tags$style(
+                                '#picking_order :is(th, td) {padding: 0;}'
+                            ),
+                            shinydashboard::box(
+                                title = "Picking Order", 
+                                status = "primary", 
+                                solidHeader=TRUE, 
+                                shiny::div(
+                                    formattable::formattableOutput("picking_order"),
+                                    style = "width = 20%"
+                                ),
+                                width = "20%"
+                            )
+                        )
+                    )
+                ),
                 shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
                 shiny::fluidRow(
                     shiny::tags$style(

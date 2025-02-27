@@ -79,25 +79,37 @@ get_season_picks <- function(szn = default_season(), picked = FALSE) {
 #'    may need to be added manually
 #' 
 #' @param szn Integer, the season to find the picking order for
+#' @param pretty Logical, whether to show the participants full name (TRUE, default) 
+#'  or their ID (FALSE)
 #' 
 #' @export
-get_season_picking_order <- function(szn = default_season()) {
+get_season_picking_order <- function(szn = default_season(), pretty = TRUE) {
     if (szn == all_seasons_label()) {
         cli::cli_alert_info("Picking order not implemented when all seasons selected - returning NULL")
         return(NULL)
     }
     
-    last_szn <- szn - 1
+    last_szn <- as.integer(szn) - 1
     if (last_szn %notin% unique(season_picks$season)) {
         cli::cli_alert_info("No previous season to determine order by, sorting everyone randomly")
         all_season_picks <- get_season_picks(all_seasons_label(), picked = TRUE)
-        return(sample(unique(all_season_picks$participant_id)))
+        if (pretty) {
+            return(sample(unique(all_season_picks$participant_full_name)))
+        } else {
+            return(sample(unique(all_season_picks$participant_id)))
+        }
     }
     
-    get_season_picks(szn = last_szn, picked = TRUE) |>
-        dplyr::arrange(desc(castaway_rank)) |>
-        dplyr::distinct(participant_id) |>
-        dplyr::pull(participant_id)
+    picks_arranged <- 
+        get_season_picks(szn = last_szn, picked = TRUE) |>
+        dplyr::arrange(desc(castaway_rank)) |> 
+        dplyr::distinct(participant_id, participant_full_name)
+    
+    if (pretty) {
+        dplyr::pull(picks_arranged, participant_full_name)
+    } else {
+        dplyr::pull(picks_arranged, participant_id)
+    }
 }
 
 
@@ -182,8 +194,17 @@ get_pick_data <- function(..., .szn = default_season()) {
 }
 
 
-
-
+#' Check if Season Started
+#' 
+#' @param szn Season number
+#' 
+#' @export
+season_has_started <- function(szn = default_season()) {
+    szn <- force_season_number(szn)
+    season_picks <- get_season_picks(szn = szn)
+    
+    sum(season_picks$castaway_eliminated, na.rm = TRUE) > 1
+}
 
 
 

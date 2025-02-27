@@ -2,6 +2,41 @@
 
 # Season Picks Table ----
 
+
+#' Format Picking Order
+#' 
+#' Uses the results from the previous season to determine the current seasons 
+#' picking order. Collapses the participants names into a usable UI format
+#' 
+#' @param szn Season number. Defaults to `default_season()`
+#' 
+#' @export
+ui_create_picking_order <- function(szn = default_season()) {
+    picking_order <- get_season_picking_order(szn = szn)
+    
+    # paste(picking_order, collapse = ezextras::wrap(emoji::arrow("right"), " "))
+    picking_order_tbl <- tibble::tibble(
+        Order = seq_along(picking_order),
+        Participant = picking_order
+    )
+    
+    # formattable::as.datatable(
+    #     formattable::formattable(picking_order_tbl),
+    #     escape = FALSE,
+    #     # options reference: https://datatables.net/reference/option/
+    #     options = list(
+    #         scrollX = TRUE, 
+    #         iDisplayLength = 20, # max number of castaways per season
+    #         lengthMenu = c(18)
+    #     ),
+    #     rownames = FALSE
+    # )
+    formattable::formattable(
+        picking_order_tbl,
+        align = c("c", "c")
+    )
+}
+
 #' Format Season Picks Table
 #' 
 #' Formats data for the UI picks table

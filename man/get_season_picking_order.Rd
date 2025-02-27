@@ -4,10 +4,13 @@
 \alias{get_season_picking_order}
 \title{Get Season Picking Order}
 \usage{
-get_season_picking_order(szn = default_season())
+get_season_picking_order(szn = default_season(), pretty = TRUE)
 }
 \arguments{
 \item{szn}{Integer, the season to find the picking order for}
+
+\item{pretty}{Logical, whether to show the participants full name (TRUE, default)
+or their ID (FALSE)}
 }
 \description{
 Get the picking order for a season. This only applies when \code{szn} is an integer.

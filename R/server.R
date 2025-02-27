@@ -50,6 +50,10 @@ server <- function(input, output) {
         }
     )
     
+    output$picking_order <- formattable::renderFormattable({
+        ui_create_picking_order(szn = season_input())
+    })
+    
     ## bottom 3 tiles ----
     output$last_voted_out_box <- shinydashboard::renderInfoBox({
         shinydashboard::infoBox(
@@ -86,14 +90,20 @@ server <- function(input, output) {
     ## pool winner & sole survivor tiles ----
     pool_winner_pick <- shiny::reactive({get_pool_winner(szn = season_input())})
     sole_survivor <- shiny::reactive({get_sole_survivor(szn = season_input())})
+    season_started <- shiny::reactive({season_has_started(szn = season_input())})
     
-    output$pool_winner_exists <- shiny::reactive(!is.null(pool_winner_pick()))
     # enable refresh if the default season has no pool winner
+    output$pool_winner_exists <- shiny::reactive(!is.null(pool_winner_pick()))
     shiny::outputOptions(output, 'pool_winner_exists', suspendWhenHidden = FALSE)
     
-    output$sole_survivor_exists <- shiny::reactive(!is.null(sole_survivor()))
     # enable refresh if the default season has no sole survivor
+    output$sole_survivor_exists <- shiny::reactive(!is.null(sole_survivor()))
     shiny::outputOptions(output, 'sole_survivor_exists', suspendWhenHidden = FALSE)
+    
+    # enable refresh if the default season has no sole survivor
+    output$season_has_started <- shiny::reactive(season_started())
+    shiny::outputOptions(output, 'season_has_started', suspendWhenHidden = FALSE)
+    
     
     output$pool_winner_box <- shinydashboard::renderInfoBox({
         pool_winner_pick <- pool_winner_pick()
