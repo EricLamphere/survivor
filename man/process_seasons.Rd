@@ -4,18 +4,16 @@
 \alias{process_seasons}
 \title{Process Seasons Table}
 \usage{
-process_seasons(
-  using = c("googlesheets", "configs"),
-  config_path = "data-raw/configs",
-  deauth_mode = FALSE
-)
+process_seasons(participants, castaways, picks, seasons)
 }
 \arguments{
-\item{using}{Either googlesheets or configs}
+\item{participants}{Participants data from googlesheet}
 
-\item{config_path}{Path to the config files}
+\item{castaways}{Castaway data from googlesheet}
 
-\item{deauth_mode}{Whether or not to authenticate with Google Sheets in deauth mode}
+\item{picks}{Picks data from googlesheet}
+
+\item{seasons}{Seasons data from googlesheet}
 }
 \description{
 Creates the base season picks table using either the data in googlesheets

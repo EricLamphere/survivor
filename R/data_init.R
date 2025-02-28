@@ -1,5 +1,5 @@
 
-
+# googlesheets auth ----
 
 # options(gargle_oauth_cache = ".secrets")
 
@@ -33,40 +33,36 @@ gs_get_srvivor_data <- function(tab_name) {
 }
 
 
+#' Retrieve All Data From Google Sheets
+#' 
+#' Retrieve all relevant data from googlesheets
+#' 
+#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
+gs_get_all_data <- function(deauth_mode = FALSE) {
+    gs_auth(deauth_mode = deauth_mode)
+    
+    list(
+        participants = gs_get_srvivor_data("participants"),
+        castaways = gs_get_srvivor_data("castaways"),
+        picks = gs_get_srvivor_data("picks"),
+        seasons = gs_get_srvivor_data("seasons")    
+    )
+}
+
+
+
+# season picks table ----
 
 #' Process Seasons Table
 #' 
 #' Creates the base season picks table using either the data in googlesheets
 #' or the config files
 #' 
-#' @param using Either googlesheets or configs
-#' @param config_path Path to the config files
-#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
-process_seasons <- function(using = c("googlesheets", "configs"), 
-                            config_path = "data-raw/configs",
-                            deauth_mode = FALSE) {
-    using <- match.arg(using)
-    
-    switch(
-        using,
-        googlesheets = .process_seasons__googlesheets(deauth_mode = deauth_mode),
-        configs = .process_seasons__configs(config_path = config_path)
-    )
-}
-
-
-#' Process All Seasons Using Google Sheets
-#' 
-#' Process the data in the survivor Google Sheet
-#' 
-#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
-.process_seasons__googlesheets <- function(deauth_mode = FALSE) {
-    gs_auth(deauth_mode = deauth_mode)
-    participants <- gs_get_srvivor_data("participants")
-    castaways <- gs_get_srvivor_data("castaways")
-    picks <- gs_get_srvivor_data("picks")
-    seasons <- gs_get_srvivor_data("seasons")
-    
+#' @param participants Participants data from googlesheet
+#' @param castaways Castaway data from googlesheet
+#' @param picks Picks data from googlesheet
+#' @param seasons Seasons data from googlesheet
+process_seasons <- function(participants, castaways, picks, seasons) {
     castaways |>
         dplyr::left_join(picks, by = c("season", "castaway_id")) |>
         dplyr::left_join(participants, by = c("participant_id")) |>
@@ -75,42 +71,11 @@ process_seasons <- function(using = c("googlesheets", "configs"),
             season_cost_per_day = cost_per_day, 
             season_sole_survivor_bonus = sole_survivor_bonus
         ) |>
-        dplyr::select(dplyr::starts_with("season"), dplyr::starts_with("participant"), dplyr::starts_with("castaway"))
-}
-
-
-
-
-
-#' Process All Seasons Using Configs
-#' 
-#' Process each seasons config file with `process_season_config` and bind
-#' all seasons together
-#' 
-#' @param config_path Path to the config files, defaults to the right path
-.process_seasons__configs <- function(config_path = "data-raw/configs") {
-    seasons_config_path <- config_path %//% "seasons"
-    castaway_files <- list.files(seasons_config_path, recursive = TRUE)
-    
-    pool_party <- yaml::read_yaml(config_path %//% "pool_party.yml")
-    participants <- pool_party$participants
-    participants_lookup <- 
-        purrr::imap_dfr(
-            participants,
-            ~ tibble::tibble(
-                participant_id = .y,
-                participant_first = .x$first,
-                participant_last = .x$last
-            )
+        dplyr::select(
+            dplyr::starts_with("season"), 
+            dplyr::starts_with("participant"), 
+            dplyr::starts_with("castaway")
         )
-    
-    season_picks <- purrr::map_dfr(
-        castaway_files, 
-        ~ process_season_config(
-            config = yaml::read_yaml(file.path(seasons_config_path , .x)),
-            participants = participants_lookup
-        )
-    )
 }
 
 
@@ -272,6 +237,9 @@ calculate_participant_fields <- function(seasons_tbl) {
 }
 
 
+#' Parse Participant Name
+#' 
+#' @param picks Picks dataset
 .process_participant_name <- function(picks) {
     picks |> 
         dplyr::mutate(
@@ -282,6 +250,9 @@ calculate_participant_fields <- function(seasons_tbl) {
             participant_full_name = trimws(participant_first %&% ' ' %&% participant_last)
         )
 }
+
+
+
 
 
 #' Cleanup Season Picks Dataset
@@ -329,22 +300,21 @@ add_historical_data <- function(picks) {
 #' 
 #' Main method for creating the season picks table with all transformations applied
 #' 
-#' @param using Either googlesheets or configs
-#' @param config_path Path to the config files, defaults to the right path
-#' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
+#' @param all_data Named list of tabs and their data from the survivor googlesheet
 #' @param augment_with_historical Logical, whether or not to add historical data.
 #'  See `?historical_data` for more info
 #' 
 #' @export
-create_season_picks <- function(using = c("googlesheets", "configs"), 
-                                config_path = "data-raw/configs",
-                                deauth_mode = FALSE,
-                                augment_with_historical = TRUE) {
-    using <- match.arg(using)
+create_season_picks <- function(all_data = NULL, augment_with_historical = TRUE) {
+    if (is.null(all_data)) {
+        all_data <- gs_get_all_data()
+    }
+    
     seasons_tbl <- process_seasons(
-        using = using,
-        config_path = config_path,
-        deauth_mode = deauth_mode
+        participants = all_data$participants,
+        castaways = all_data$castaways,
+        picks = all_data$picks,
+        seasons = all_data$seasons
     )
     
     picks <- 
@@ -358,3 +328,141 @@ create_season_picks <- function(using = c("googlesheets", "configs"),
     
     cleanup_season_picks(picks)
 }
+
+
+# participants table ----
+
+#' Get Participant Picking Order
+#' 
+#' For each season, set the picking order. If no previous season, pick randomly.
+#' If there's a new participant, they are placed last.
+#' 
+#' @param participants_enriched Participants data with full name joined in
+#' @param season_picks Season picks dataset
+set_participant_picking_order <- function(participants_enriched, season_picks) {
+    valid_participants <- 
+        dplyr::distinct(participants_enriched, season, participant_id, participant_full_name, picking_order) |> 
+        split(~season) |> 
+        purrr::map(
+            ~ dplyr::distinct(dplyr::select(.x, -season))
+        )
+    
+    season_rankings <- 
+        season_picks |> 
+        dplyr::filter(!is.na(participant_id)) |> 
+        dplyr::distinct(season, participant_id, participant_rank) |> 
+        dplyr::arrange(season, desc(participant_rank)) |> 
+        dplyr::group_by(season) |> 
+        dplyr::mutate(next_season_picking_order = max(participant_rank, na.rm = TRUE) + 1 - participant_rank) |> 
+        dplyr::ungroup() |> 
+        split(~season) |> 
+        purrr::map(~ dplyr::select(.x, -c(season, participant_rank)))
+    
+    seasons_in_play <- unique(
+        names(valid_participants),
+        names(season_rankings)
+    )
+    
+    seasons_in_play |> 
+        purrr::map(
+            ~ .set_participant_picking_order__szn(
+                season_participants = valid_participants[[.x]],
+                previous_season_rankings = season_rankings[[as.character(as.integer(.x) - 1)]]
+            ) |> 
+                dplyr::mutate(season = as.integer(.x))
+        ) |> 
+        dplyr::bind_rows() |> 
+        dplyr::select(
+            season, dplyr::starts_with("participant_"), dplyr::everything()
+        )
+}
+
+.set_participant_picking_order__szn <- function(season_participants, previous_season_rankings) {
+    if (all(!is.na(season_participants$picking_order))) {
+        return(season_participants)
+    }
+    
+    # if picking_order isn't set and there's no previous season, random order
+    if (is.null(previous_season_rankings)) {
+        picking_order_options <- seq_len(nrow(season_participants))
+        season_picking_order <- 
+            season_participants |> 
+            dplyr::mutate(
+                picking_order = sample(picking_order_options)
+            )
+        
+        return(season_picking_order)
+    }
+    
+    season_picking_order <- 
+        season_participants |> 
+        dplyr::left_join(previous_season_rankings, by = "participant_id") |> 
+        dplyr::mutate(
+            picking_order = dplyr::case_when(
+                is.na(picking_order) ~ next_season_picking_order,
+                TRUE ~ picking_order
+            )
+        )
+    
+    if (any(is.na(season_picking_order$picking_order))) {
+        max_picking_order <- max(season_picking_order$picking_order, na.rm = TRUE)
+        n_na <- sum(is.na(season_picking_order$picking_order))
+        picking_order_adders <- seq_len(n_na)
+        new_picking_orders <- max_picking_order + picking_order_adders
+        
+        season_picking_order <- 
+            season_picking_order |> 
+            dplyr::mutate(
+                picking_order = dplyr::case_when(
+                    is.na(picking_order) ~ new_picking_orders,
+                    TRUE ~ picking_order
+                )
+            )
+    }
+    
+    season_picking_order <-
+        dplyr::mutate(
+            season_picking_order,
+            picking_order = rank(picking_order)
+        ) |> 
+        dplyr::arrange(picking_order) |> 
+        dplyr::select(-next_season_picking_order)
+    
+    season_picking_order
+}
+
+
+
+
+.get_participants_enriched <- function(picks, participants) {
+    picks |> 
+        dplyr::left_join(
+            participants,
+            by = "participant_id"
+        ) |> 
+        .process_participant_name()
+}
+
+#' Create Participants Data Frame
+#' 
+#' Main method for creating the participants table with all transformations applied
+#' 
+#' @param all_data Named list of tabs and their data from the survivor googlesheet
+#' 
+#' @export
+create_season_participants <- function(all_data) {
+    season_picks <- create_season_picks(all_data, augment_with_historical = FALSE)
+    participants_enriched <- .get_participants_enriched(
+        picks = all_data$picks, 
+        participants = all_data$participants
+    )
+    
+    set_participant_picking_order(
+        participants_enriched = participants_enriched,
+        season_picks = season_picks
+    )
+}
+
+
+
+

@@ -12,13 +12,15 @@
 #' 
 #' @export
 ui_create_picking_order <- function(szn = default_season()) {
-    picking_order <- get_season_picking_order(szn = szn)
+    picking_order <- get_season_participants(szn = szn)
     
     # paste(picking_order, collapse = ezextras::wrap(emoji::arrow("right"), " "))
-    picking_order_tbl <- tibble::tibble(
-        Order = seq_along(picking_order),
-        Participant = picking_order
-    )
+    picking_order_tbl <- 
+        picking_order |> 
+        dplyr::transmute(
+            Order = picking_order,
+            Participant = participant_full_name
+        )
     
     # formattable::as.datatable(
     #     formattable::formattable(picking_order_tbl),

@@ -71,45 +71,20 @@ get_season_picks <- function(szn = default_season(), picked = FALSE) {
 
 #' Get Season Picking Order
 #' 
-#' Get the picking order for a season. This only applies when `szn` is an integer.
-#' Notes:
-#'  * When the previous season doesn't exist, all historical participants 
-#'    are sorted randomly
-#'  * Only participants in the `season_picks` table are included, so new participants
-#'    may need to be added manually
+#' List participants and in what order they will submit their pick
 #' 
-#' @param szn Integer, the season to find the picking order for
-#' @param pretty Logical, whether to show the participants full name (TRUE, default) 
-#'  or their ID (FALSE)
+#' @param szn Integer, season number
 #' 
 #' @export
-get_season_picking_order <- function(szn = default_season(), pretty = TRUE) {
-    if (szn == all_seasons_label()) {
-        cli::cli_alert_info("Picking order not implemented when all seasons selected - returning NULL")
-        return(NULL)
-    }
-    
-    last_szn <- as.integer(szn) - 1
-    if (last_szn %notin% unique(season_picks$season)) {
-        cli::cli_alert_info("No previous season to determine order by, sorting everyone randomly")
-        all_season_picks <- get_season_picks(all_seasons_label(), picked = TRUE)
-        if (pretty) {
-            return(sample(unique(all_season_picks$participant_full_name)))
-        } else {
-            return(sample(unique(all_season_picks$participant_id)))
-        }
-    }
-    
-    picks_arranged <- 
-        get_season_picks(szn = last_szn, picked = TRUE) |>
-        dplyr::arrange(desc(castaway_rank)) |> 
-        dplyr::distinct(participant_id, participant_full_name)
-    
-    if (pretty) {
-        dplyr::pull(picks_arranged, participant_full_name)
+get_season_participants <- function(szn = default_season()) {
+    all_szn_label <- all_seasons_label()
+    if (szn == all_szn_label) {
+        participants <- season_participants
     } else {
-        dplyr::pull(picks_arranged, participant_id)
+        participants <- dplyr::filter(season_participants, season == szn)
     }
+    
+    participants
 }
 
 

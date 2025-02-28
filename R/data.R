@@ -37,3 +37,16 @@
 #'}
 #' @details Season configs processed into a table
 "historical_castaways"
+
+
+#' @title Season Participants
+#' @description Participants by season and their picking order
+#' @format A data frame with 39 rows and 4 variables:
+#' \describe{
+#'   \item{\code{season}}{integer Season number}
+#'   \item{\code{participant_id}}{character The ID for the participant in the pool}
+#'   \item{\code{participant_full_name}}{character First and last name of the participant in the pool}
+#'   \item{\code{picking_order}}{double The order that the participant makes their pick} 
+#'}
+#' @details DETAILS
+"season_participants"
