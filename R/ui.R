@@ -175,7 +175,7 @@ ui <- function(input) {
                     shinydashboard::infoBoxOutput("season_wiki_box")
                 ),
                 shiny::conditionalPanel(
-                    condition = '!output.season_has_started',
+                    condition = '!output.season_has_started & output.season_label != "All Seasons"',
                     shiny::fluidRow(
                         shiny::column(
                             width = 6,

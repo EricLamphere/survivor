@@ -13,13 +13,22 @@
 #' @export
 ui_create_picking_order <- function(szn = default_season()) {
     picking_order <- get_season_participants(szn = szn)
+    season_picks <- 
+        get_season_picks(szn = szn) |> 
+        dplyr::select(participant_id, castaway_name) |> 
+        dplyr::filter(!is.na(participant_id))
     
     # paste(picking_order, collapse = ezextras::wrap(emoji::arrow("right"), " "))
     picking_order_tbl <- 
         picking_order |> 
+        dplyr::left_join(
+            season_picks,
+            by = "participant_id"
+        ) |> 
         dplyr::transmute(
             Order = picking_order,
-            Participant = participant_full_name
+            Participant = participant_full_name,
+            Pick = ifelse(is.na(castaway_name), "", castaway_name)
         )
     
     # formattable::as.datatable(
