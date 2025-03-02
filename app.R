@@ -9,9 +9,12 @@ cli::cli_alert_info("Loading survivor package")
 pkgload::load_all(".")
 
 
+
 # GLOBALS
 # > I just don't want to refactor everything to take a dataframe input
 counter <<- 0
+
+gs_auth()
 
 all_data <- gs_get_all_data()
 season_picks <<- create_season_picks(all_data = all_data, augment_with_historical = TRUE)

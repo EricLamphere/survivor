@@ -23,18 +23,14 @@ jobs:
               env:
                 GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: | 
-                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv'), type = 'binary')"
+                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv', 'devtools'), type = 'binary')"
                 Rscript -e "renv::consent(provided = FALSE); renv::restore()"
             
-            - name: Create Google Service Account Key File
+            - name: Set Google Credentials as Environment Variable
               env: |
-                GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+                GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
               run: |
-                mkdir .secrets && echo "$GCP_SERVICE_ACCOUNT_KEY" > .secrets/gcp-service-account.json
-            
-            - name: Authenticate Google Sheets
-              run: |
-                Rscript -e 'googlesheets4::gs4_auth(path = ".secrets/gcp-service-account.json")'
+                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64 set successfully"
             
             - name: Push to shiny.io
               env: 

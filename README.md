@@ -11,9 +11,10 @@ The app can be found [here](https://ericlamphere.shinyapps.io/survivor/) - Enjoy
 There are a couple things needed to run the code in this repo:
 
 1.  Grant access to a googlesheet. You can do this in a few ways
-    1.  **Local & GH deployment** (best method): Set up a service account and create a json key with access to the googlesheets API. stored in `.secrets/gcp-service-account.json`
-    2.  **Local deployment only**: Follow the instructions [here](https://cemyilmaz185.medium.com/how-to-setup-non-interactive-authentication-with-googlesheets4-package-on-r-a0baa5ff8ab0) to cache an auth token and use that every time.
-        -   To use this authentication method, pass `NULL` to the `gs_auth` `path` parameter
+    1.  **Local & GH deployment** (best method): Set up a service account and create a json key with access to the googlesheets API. Store that key in one of the following locations:
+        a.  `.secrets/gcp-service-account.json`
+        b.  base64 encoded in `GCP_SERVICE_ACCOUNT_KEY_BASE64` environment variable
+    2.  **Local deployment only**: Follow the instructions [here](https://cemyilmaz185.medium.com/how-to-setup-non-interactive-authentication-with-googlesheets4-package-on-r-a0baa5ff8ab0) to cache an auth token and use that every time
     3.  **No security**: Make your googlesheet public
         -   To avoid authenticating with googlesheets, pass `TRUE` to the `gs_auth` `deauth_mode` parameter
 2.  Add data to your googlesheet with the following tabs and fields:

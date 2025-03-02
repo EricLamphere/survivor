@@ -4,14 +4,24 @@
 \alias{gs_auth}
 \title{Authenticate With Google Sheets}
 \usage{
-gs_auth(cache = ".secrets", email = "elampsart@gmail.com", deauth_mode = FALSE)
+gs_auth(
+  svc_acct_json_path = ".secrets/gcp-service-account.json",
+  gargle_creds_env_name = "GCP_SERVICE_ACCOUNT_KEY_BASE64",
+  cache = ".secrets",
+  email = "elampsart@gmail.com",
+  deauth_mode = FALSE
+)
 }
 \arguments{
+\item{svc_acct_json_path}{Path to service account json. Defaults to \code{.secrets/gcp-service-account.json}}
+
 \item{cache}{Where the secret is stored}
 
 \item{email}{Email to authenticate with}
 
 \item{deauth_mode}{Whether or not to run only with \code{\link[googlesheets4:gs4_deauth]{googlesheets4::gs4_deauth()}}}
+
+\item{gargle_creds_path}{Path to credentials used by gargle (hot the application deploys using github actions)}
 }
 \description{
 Authenticate With Google Sheets

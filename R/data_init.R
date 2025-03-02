@@ -6,26 +6,66 @@
 
 #' Authenticate With Google Sheets
 #' 
+#' @param svc_acct_json_path Path to service account json. Defaults to `.secrets/gcp-service-account.json`
+#' @param gargle_creds_path Path to credentials used by gargle (hot the application deploys using github actions)
 #' @param cache Where the secret is stored
 #' @param email Email to authenticate with
 #' @param deauth_mode Whether or not to run only with [googlesheets4::gs4_deauth()]
 #' 
 #' @export
-gs_auth <- function(path = ".secrets/gcp-service-account.json", cache = ".secrets", email = "elampsart@gmail.com", deauth_mode = FALSE) {
+gs_auth <- function(svc_acct_json_path = ".secrets/gcp-service-account.json", 
+                    gargle_creds_env_name = "GCP_SERVICE_ACCOUNT_KEY_BASE64",
+                    cache = ".secrets", 
+                    email = "elampsart@gmail.com", 
+                    deauth_mode = FALSE) {
     googlesheets4::gs4_deauth()
     
     if (deauth_mode) {
         return(invisible(NULL))
     }
     
-    # if path is NULL, use cache in .secrets folder
-    if (is.null(path)) {
-        googlesheets4::gs4_auth(cache = cache, email = email)
+    if (file.exists(svc_acct_json_path)) {
+        cli::cli_alert_info("Authenticating using service account json key")
+        googlesheets4::gs4_auth(path = svc_acct_json_path)
+        return(invisible(NULL))
     }
     
-    googlesheets4::gs4_auth(path = path)
+    if (length(list.files(cache))) {
+        cli::cli_alert_info("Authenticating using auth cache")
+        googlesheets4::gs4_auth(cache = cache, email = email)
+        return(invisible(NULL))
+    }
     
-    invisible(NULL)
+    if (Sys.getenv(gargle_creds_env_name) != "") {
+        cli::cli_alert_info("Authenticating using base64 encoded service account json key from environment variable")
+        json_key <- Sys.getenv(gargle_creds_env_name)
+        
+        if (nzchar(json_key)) {
+            # Decode the Base64 string back into JSON
+            json_key <- rawToChar(base64enc::base64decode(json_key))
+            
+            # Convert JSON string into a list (used for authentication)
+            service_account_info <- jsonlite::fromJSON(json_key)
+            
+            # Authenticate with Google Sheets
+            googlesheets4::gs4_auth(
+                credentials = gargle::credentials_service_account(
+                    info = service_account_info,
+                    scopes = "https://www.googleapis.com/auth/spreadsheets"
+                )
+            )
+            return(invisible(NULL))
+        } else {
+            cli::cli_alert_warning("No Google Service Account key found in {gargle_creds_env_name} environment variable")
+        }  
+    }
+    
+    cli::cli_abort(c(
+        "No credentials found in any of the following locations:",
+        ">" = svc_acct_json_path,
+        ">" = gargle_creds_env_name %&% " environment variable",
+        ">" = cache %//% "*"
+    ))
 }
 
 
@@ -48,7 +88,7 @@ gs_get_srvivor_data <- function(tab_name) {
 #' 
 #' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
 gs_get_all_data <- function(deauth_mode = FALSE) {
-    gs_auth(path = ".secrets/gcp-service-account.json", deauth_mode = deauth_mode)
+    gs_auth()
     
     list(
         participants = gs_get_srvivor_data("participants"),
