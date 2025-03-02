@@ -30,7 +30,7 @@ jobs:
               env: 
                 GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
               run: |
-                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> ./.Renviron
+                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .Renviron
             
             - name: Push to shiny.io
               env: 
@@ -43,11 +43,7 @@ jobs:
                     token=Sys.getenv('SHINYAPPS_TOKEN'), 
                     secret=Sys.getenv('SHINYAPPS_SECRET')
                 )" 
-                Rscript -e "rsconnect::deployApp(
-                    appDir = './', 
-                    appName = Sys.getenv('APP_NAME'), 
-                    forceUpdate = TRUE
-                )"
+                Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'), forceUpdate = TRUE)"
   
   
   

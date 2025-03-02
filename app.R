@@ -3,8 +3,10 @@
 # way to deploy from github actions because you can't use the "envVars" parameter
 # in rsconnect::deployApp unless you're using Connect
 renviron_file <- "./.Renviron"
-readRenviron(path = renviron_file)
-file.remove(renviron_file)
+if (file.exists(renviron_file)) {
+    readRenviron(path = renviron_file)
+    file.remove(renviron_file)  
+}
 rm(renviron_file)
 
 
