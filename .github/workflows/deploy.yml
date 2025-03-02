@@ -23,7 +23,8 @@ jobs:
               env:
                 GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: | 
-                Rscript -e "install.packages(c('rsconnect'), type = 'binary')"
+                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv'), type = 'binary')"
+                Rscript -e "renv::consent(provided = FALSE); renv::restore()"
                 
             - name: Set Google Credentials as Environment Variable
               env: 
@@ -36,14 +37,18 @@ jobs:
                 SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
                 SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
                 SHINYAPPS_ACCOUNT_NAME: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
-                GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: |
                 Rscript -e "rsconnect::setAccountInfo(
                     name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), 
                     token=Sys.getenv('SHINYAPPS_TOKEN'), 
                     secret=Sys.getenv('SHINYAPPS_SECRET')
                 )" 
-                Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'), forceUpdate = TRUE)"
+                Rscript -e "rsconnect::deployApp(
+                    appDir = './', 
+                    appName = Sys.getenv('APP_NAME'), 
+                    forceUpdate = TRUE,
+                    logLevel = 'verbose'
+                )"
   
   
   
