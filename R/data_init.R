@@ -24,20 +24,20 @@ gs_auth <- function(svc_acct_json_path = ".secrets/gcp-service-account.json",
         return(invisible(NULL))
     }
     
-    if (file.exists(svc_acct_json_path)) {
-        cli::cli_alert_info("Authenticating using service account json key")
-        googlesheets4::gs4_auth(path = svc_acct_json_path)
-        return(invisible(NULL))
-    }
-    
     if (length(list.files(cache))) {
-        cli::cli_alert_info("Authenticating using auth cache")
+        cli::cli_alert_info("Authenticating with method #1: OAuth token cache")
         googlesheets4::gs4_auth(cache = cache, email = email)
         return(invisible(NULL))
     }
     
+    if (file.exists(svc_acct_json_path)) {
+        cli::cli_alert_info("Authenticating using method #2: Service account json file")
+        googlesheets4::gs4_auth(path = svc_acct_json_path)
+        return(invisible(NULL))
+    }
+    
     if (Sys.getenv(gargle_creds_env_name) != "") {
-        cli::cli_alert_info("Authenticating using base64 encoded service account json key from environment variable")
+        cli::cli_alert_info("Authenticating using method #3: base64 encoded service account json key from environment variable")
         json_key <- Sys.getenv(gargle_creds_env_name)
         
         if (nzchar(json_key)) {
@@ -61,10 +61,10 @@ gs_auth <- function(svc_acct_json_path = ".secrets/gcp-service-account.json",
     }
     
     cli::cli_abort(c(
-        "No credentials found in any of the following locations:",
-        ">" = svc_acct_json_path,
-        ">" = gargle_creds_env_name %&% " environment variable",
-        ">" = cache %//% "*"
+        "Credentials not provided for any of the following methods:",
+        ">" = "Method #1: OAuth token cache in " %&% cache %//% "*",
+        ">" = "Method #2: Service account json file " %&% svc_acct_json_path,
+        ">" = "Method #3: " %&% gargle_creds_env_name %&% " environment variable"
     ))
 }
 
