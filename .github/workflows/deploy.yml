@@ -23,9 +23,9 @@ jobs:
               env:
                 GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: | 
-                Rscript -e "install.packages(c('rsconnect'), type = 'binary')"
+                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv'), type = 'binary')"
+                Rscript -e "renv::consent(provided = FALSE); renv::restore()"
                 
-            
             - name: Set Google Credentials as Environment Variable
               env: 
                 GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
