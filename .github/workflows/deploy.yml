@@ -26,17 +26,18 @@ jobs:
                 Rscript -e "install.packages(c('rsconnect'), type = 'binary')"
                 
             
-            - name: Set Google Credentials as Environment Variable
-              env: 
-                GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
-              run: |
-                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .Renviron
+            # - name: Set Google Credentials as Environment Variable
+            #   env: 
+            #     GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
+            #   run: |
+            #     echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .Renviron
             
             - name: Push to shiny.io
               env: 
                 SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
                 SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
                 SHINYAPPS_ACCOUNT_NAME: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
+                GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
               run: |
                 Rscript -e "rsconnect::setAccountInfo(
                     name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), 
