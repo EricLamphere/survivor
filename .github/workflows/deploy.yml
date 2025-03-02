@@ -27,7 +27,8 @@ jobs:
                 Rscript -e "renv::consent(provided = FALSE); renv::restore()"
             
             - name: Create Google Service Account Key File
-              env: GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+              env: |
+                GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
               run: |
                 mkdir .secrets && echo "$GCP_SERVICE_ACCOUNT_KEY" > .secrets/gcp-service-account.json
             
