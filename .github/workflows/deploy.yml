@@ -30,7 +30,7 @@ jobs:
               env: 
                 GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
               run: |
-                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .Renviron
+                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> R/.Renviron
             
             - name: Push to shiny.io
               env: 
