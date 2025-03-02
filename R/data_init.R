@@ -11,12 +11,21 @@
 #' @param deauth_mode Whether or not to run only with [googlesheets4::gs4_deauth()]
 #' 
 #' @export
-gs_auth <- function(cache = ".secrets", email = "elampsart@gmail.com", deauth_mode = FALSE) {
+gs_auth <- function(path = ".secrets/gcp-service-account.json", cache = ".secrets", email = "elampsart@gmail.com", deauth_mode = FALSE) {
     googlesheets4::gs4_deauth()
     
-    if (!deauth_mode) {
-        googlesheets4::gs4_auth(cache = cache, email = email)  
+    if (deauth_mode) {
+        return(invisible(NULL))
     }
+    
+    # if path is NULL, use cache in .secrets folder
+    if (is.null(path)) {
+        googlesheets4::gs4_auth(cache = cache, email = email)
+    }
+    
+    googlesheets4::gs4_auth(path = path)
+    
+    invisible(NULL)
 }
 
 
@@ -39,7 +48,7 @@ gs_get_srvivor_data <- function(tab_name) {
 #' 
 #' @param deauth_mode Whether or not to authenticate with Google Sheets in deauth mode
 gs_get_all_data <- function(deauth_mode = FALSE) {
-    gs_auth(deauth_mode = deauth_mode)
+    gs_auth(path = ".secrets/gcp-service-account.json", deauth_mode = deauth_mode)
     
     list(
         participants = gs_get_srvivor_data("participants"),

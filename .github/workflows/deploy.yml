@@ -1,26 +1,4 @@
-# name: Deploy to shinyapps.io
-# on:
-#   workflow_dispatch:
-#       
-# jobs:
-#   deploy:
-#     name: Deploy App
-# 
-#     # allow skipping deployment for commits containing '[automated]' or '[no-deploy]' in the commit message
-#     if: "!contains(github.event.head_commit.message, '[automated]') && !contains(github.event.head_commit.message, '[no-deploy]')"
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: deploy
-#         uses: BDSI-Utwente/shinyapps-deploy-github-action@v1
-#         with:
-#           # account and application name (https://<accountName>.shinyapps.io/<appName>)
-#           appName: survivor-dev
-#           accountName: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
-# 
-#           # token and secret obtained from https://www.shinyapps.io/admin/#/tokens
-#           accountToken: ${{ secrets.SHINYAPPS_TOKEN }}
-#           accountSecret: ${{ secrets.SHINYAPPS_SECRET }}
+
           
 on: 
     push:
@@ -28,6 +6,9 @@ on:
             - main
 
 name: Deploy App
+
+env:
+    APP_NAME: survivor_dev
 
 jobs:
     deploy:
@@ -37,20 +18,34 @@ jobs:
             - uses: r-lib/actions/setup-r@v2
               with:
                 r-version: '4.4.1'
+            
             - name: Install Packages
               env:
                 GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: | 
                 Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv'), type = 'binary')"
                 Rscript -e "renv::consent(provided = FALSE); renv::restore()"
+            
+            - name: Create Google Service Account Key File
+              env: GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+              run: |
+                mkdir .secrets && echo "$GCP_SERVICE_ACCOUNT_KEY" > .secrets/gcp-service-account.json
+            
+            - name: Authenticate Google Sheets
+              run: |
+                Rscript -e 'googlesheets4::gs4_auth(path = ".secrets/gcp-service-account.json")'
+            
             - name: Push to shiny.io
               env: 
                 SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
                 SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
                 SHINYAPPS_ACCOUNT_NAME: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
-                APP_NAME: survivor_dev
               run: |
-                Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), token=Sys.getenv('SHINYAPPS_TOKEN'), secret=Sys.getenv('SHINYAPPS_SECRET'))" 
+                Rscript -e "rsconnect::setAccountInfo(
+                    name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), 
+                    token=Sys.getenv('SHINYAPPS_TOKEN'), 
+                    secret=Sys.getenv('SHINYAPPS_SECRET')
+                )" 
                 Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'), forceUpdate = TRUE)"
   
   
