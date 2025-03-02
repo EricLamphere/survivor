@@ -43,7 +43,12 @@ jobs:
                     token=Sys.getenv('SHINYAPPS_TOKEN'), 
                     secret=Sys.getenv('SHINYAPPS_SECRET')
                 )" 
-                Rscript -e "rsconnect::deployApp(appDir = './', appName = Sys.getenv('APP_NAME'), forceUpdate = TRUE)"
+                Rscript -e "rsconnect::deployApp(
+                    appDir = './', 
+                    appName = Sys.getenv('APP_NAME'), 
+                    forceUpdate = TRUE, 
+                    envVars = 'GCP_SERVICE_ACCOUNT_KEY_BASE64'
+                )"
   
   
   
