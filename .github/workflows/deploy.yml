@@ -23,7 +23,7 @@ jobs:
               env:
                 GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
               run: | 
-                Rscript -e "install.packages(c(rsconnect'), type = 'binary')"
+                Rscript -e "install.packages(c('rsconnect'), type = 'binary')"
                 
             
             - name: Set Google Credentials as Environment Variable
