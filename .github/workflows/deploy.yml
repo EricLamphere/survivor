@@ -19,12 +19,12 @@ jobs:
               with:
                 r-version: '4.4.1'
             
-            - name: Install Packages
-              env:
-                GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
-              run: | 
-                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv', 'devtools'), type = 'binary')"
-                Rscript -e "renv::consent(provided = FALSE); renv::restore()"
+            # - name: Install Packages
+            #   env:
+            #     GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
+            #   run: | 
+            #     Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv', 'devtools'), type = 'binary')"
+            #     Rscript -e "renv::consent(provided = FALSE); renv::restore()"
             
             - name: Set Google Credentials as Environment Variable
               env: 
