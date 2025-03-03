@@ -31,7 +31,7 @@ jobs:
               env: 
                 GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
               run: |
-                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> custom_env
+                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .custom_env
             
             - name: Push to shiny.io
               env: 
@@ -48,7 +48,8 @@ jobs:
                     appDir = './', 
                     appName = Sys.getenv('APP_NAME_DEV'), 
                     forceUpdate = TRUE,
-                    logLevel = 'verbose'
+                    logLevel = 'verbose',
+                    appFiles = c(rsconnect::listDeploymentFiles("./"), '.custom_env')
                 )"
   
   

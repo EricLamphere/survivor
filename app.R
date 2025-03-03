@@ -13,7 +13,7 @@ pkgload::load_all(".")
 # way to deploy from github actions because you can't use the "envVars" parameter
 # in rsconnect::deployApp unless you're using Connect
 prepare_env <- function() {
-    renviron_file <- "custom_env"
+    renviron_file <- ".custom_env"
     
     if (file.exists(renviron_file)) {
         cli::cli_alert_warning("Reading variables from {renviron_file} then removing file")
