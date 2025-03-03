@@ -49,7 +49,7 @@ jobs:
                     appName = Sys.getenv('APP_NAME_DEV'), 
                     forceUpdate = TRUE,
                     logLevel = 'verbose',
-                    appFiles = c(rsconnect::listDeploymentFiles("./"), '.custom_env')
+                    appFiles = c(rsconnect::listDeploymentFiles('./'), '.custom_env')
                 )"
   
   
