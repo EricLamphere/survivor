@@ -1,0 +1,56 @@
+
+          
+on:
+    push:
+        branches:
+            - main
+
+name: Deploy App - dev
+
+env:
+    APP_NAME: survivor
+    APP_NAME_DEV: survivor_dev
+
+jobs:
+    deploy:
+        runs-on: macOS-14
+        steps:
+            - uses: actions/checkout@v2
+            - uses: r-lib/actions/setup-r@v2
+              with:
+                r-version: '4.4.1'
+            
+            - name: Install Packages
+              env:
+                GITHUB_PAT: ${{ secrets.GH_READ_TOKEN }}
+              run: | 
+                Rscript -e "install.packages(c('shiny', 'rsconnect', 'renv'), type = 'binary')"
+                Rscript -e "renv::consent(provided = FALSE); renv::restore()"
+                
+            - name: Set Google Credentials as Environment Variable
+              env: 
+                GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
+              run: |
+                echo "GCP_SERVICE_ACCOUNT_KEY_BASE64=${GCP_SERVICE_ACCOUNT_KEY_BASE64}" >> .custom_env
+            
+            - name: Push to shiny.io
+              env: 
+                SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
+                SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+                SHINYAPPS_ACCOUNT_NAME: ${{ vars.SHINYAPPS_ACCOUNT_NAME }}
+              run: |
+                Rscript -e "rsconnect::setAccountInfo(
+                    name=Sys.getenv('SHINYAPPS_ACCOUNT_NAME'), 
+                    token=Sys.getenv('SHINYAPPS_TOKEN'), 
+                    secret=Sys.getenv('SHINYAPPS_SECRET')
+                )" 
+                Rscript -e "rsconnect::deployApp(
+                    appDir = './', 
+                    appName = Sys.getenv('APP_NAME_DEV'), 
+                    forceUpdate = TRUE,
+                    logLevel = 'verbose'
+                )"
+  
+  
+  
+  
