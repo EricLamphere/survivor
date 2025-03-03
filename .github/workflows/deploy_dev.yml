@@ -5,7 +5,7 @@ on:
         branches:
             - main
 
-name: Deploy App - dev
+name: Deploy App - Dev
 
 env:
     APP_NAME: survivor
