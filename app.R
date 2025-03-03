@@ -24,8 +24,8 @@ prepare_env <- function() {
     }
 }
 
-list.files("./", all.files = TRUE)
-getwd()
+print(list.files("./", all.files = TRUE))
+print(getwd())
 prepare_env()
 
 
