@@ -439,7 +439,11 @@ set_participant_picking_order <- function(participants_enriched, season_picks) {
 #' @param all_data Named list of tabs and their data from the survivor googlesheet
 #' 
 #' @export
-create_season_participants <- function(all_data) {
+create_season_participants <- function(all_data = NULL) {
+    if (is.null(all_data)) {
+        all_data <- gs_get_all_data()
+    }
+    
     season_picks <- create_season_picks(all_data, augment_with_historical = FALSE)
     participants_enriched <- .get_participants_enriched(
         picks = all_data$picks, 

@@ -23,7 +23,9 @@ server <- function(input, output) {
     refresh_data <- shiny::reactive({
         counter <<- counter + 1
         if (counter > 1) {
-            season_picks <<- create_season_picks()
+            all_data <- gs_get_all_data()
+            season_picks <<- create_season_picks(all_data)
+            season_participants <<- create_season_participants(all_data)
         }
     }) |> 
         shiny::bindEvent(
@@ -46,11 +48,12 @@ server <- function(input, output) {
             ui_create_picks_table(
                 szn = season_input(),
                 picks_only = picks_only_input()
-            )  
+            )
         }
     )
     
     output$picking_order <- formattable::renderFormattable({
+        refresh_data()
         ui_create_picking_order(szn = season_input())
     })
     

@@ -176,6 +176,7 @@ ui <- function(input) {
                 ),
                 shiny::conditionalPanel(
                     condition = '!output.season_has_started & output.season_label != "All Seasons"',
+                    shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
                     shiny::fluidRow(
                         shiny::column(
                             width = 6,
