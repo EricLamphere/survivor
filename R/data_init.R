@@ -128,66 +128,6 @@ process_seasons <- function(participants, castaways, picks, seasons) {
 }
 
 
-#' Process Season Config
-#' 
-#' Process season config into a data frame
-#' 
-#' @param config Season config file parsed using `yaml::read_yaml`
-#' @param participants Config file of participants in the pool parsed using `yaml::read_yaml`
-process_season_config <- function(config, participants) {
-    season <- config$season
-    cost_per_day <- config$cost_per_day
-    sole_survivor_bonus <- config$sole_survivor_bonus
-    picks <- config$picks
-    castaways <- config$castaways
-    
-    picks_tbl <- tibble::tibble(
-        season = season,
-        season_cost_per_day = cost_per_day,
-        season_sole_survivor_bonus = sole_survivor_bonus,
-        participant_id = names(picks),
-        castaway_id = unlist(picks, use.names = FALSE)
-    ) |>
-        dplyr::left_join(
-            participants,
-            by = "participant_id"
-        ) |>
-        dplyr::select(dplyr::starts_with("season"), dplyr::starts_with("participant"), castaway_id)
-    
-    castaway_tbl <- 
-        purrr::imap_dfr(
-            castaways,
-            ~ tibble::tibble(
-                castaway_id = .y,
-                castaway_name = .x$full_name,
-                castaway_day = .x$finish$day %||% NA_integer_,
-                castaway_tie_breaker = .x$finish$tie_breaker %||% NA_integer_
-            )
-        )
-    
-    combined <- 
-        picks_tbl |>
-        dplyr::left_join(
-            castaway_tbl,
-            by = "castaway_id"
-        ) |>
-        dplyr::select(dplyr::starts_with("season"), dplyr::starts_with("participant"), dplyr::starts_with("castaway"))
-    
-    not_picked <- 
-        dplyr::filter(castaway_tbl, castaway_id %notin% unique(combined$castaway_id)) |>
-        dplyr::mutate(
-            season = season, 
-            season_cost_per_day = cost_per_day,
-            season_sole_survivor_bonus = sole_survivor_bonus
-        )
-    
-    dplyr::bind_rows(combined, not_picked)
-}
-
-
-
-
-
 #' Calculate Castaway Fields
 #' 
 #' Calculates the fields relevant to castaways for the pool, including their

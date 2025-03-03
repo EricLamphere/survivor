@@ -12,5 +12,6 @@ cli::cli_alert_info("Authenticating with shinyapps.io...")
 rsconnect::deployApp(
     appName = "survivor",
     # appName = "survivor_dev",
-    appDir = "./"
+    appDir = "./", 
+    forceUpdate = TRUE
 )

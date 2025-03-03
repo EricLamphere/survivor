@@ -23,7 +23,7 @@ server <- function(input, output) {
     refresh_data <- shiny::reactive({
         counter <<- counter + 1
         if (counter > 1) {
-            season_picks <<- create_season_picks("googlesheets")
+            season_picks <<- create_season_picks()
         }
     }) |> 
         shiny::bindEvent(
