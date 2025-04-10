@@ -121,7 +121,7 @@ last_voted_out <- function(szn = default_season()) {
         dplyr::filter(castaway_day == max(castaway_day, na.rm = TRUE)) |>
         dplyr::pull(castaway_name)
     
-    last_voted_out
+    paste(last_voted_out, collapse = " and ")
 }
 
 #' Get Number of Remaining Castaways
