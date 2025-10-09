@@ -28,7 +28,7 @@ jobs:
                 Rscript -e "renv::consent(provided = FALSE); renv::restore()"
                 
             - name: Set Google Credentials as Environment Variable
-              run: run: echo "Google credentials available at runtime."
+              run: echo "Google credentials available at runtime."
               env: 
                 GCP_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_BASE64 }}
             
