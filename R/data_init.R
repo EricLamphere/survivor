@@ -7,8 +7,8 @@
 #' Authenticate With Google Sheets
 #' 
 #' Tries multiple authentication methods in this order:
-#' 1. OAuth cache (local dev)
-#' 2. Service account JSON file (local prod)
+#' 1. Service account JSON file (local prod)
+#' 2. OAuth cache (local dev)
 #' 3. Base64-encoded service account from environment variable (CI/CD)
 #' 
 #' @param svc_acct_json_path Path to service account json. Defaults to `.secrets/gcp-service-account.json`
@@ -26,7 +26,8 @@ gs_auth <- function(
     deauth_mode = FALSE
 ) {
     scopes <- c(
-        "https://www.googleapis.com/auth/spreadsheets",
+        # "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
         "https://www.googleapis.com/auth/drive.readonly"
     )
     
@@ -37,20 +38,20 @@ gs_auth <- function(
     }
 
     tryCatch({
-        # --- Method 1: OAuth cache ---
-        token_files <- list.files(cache, full.names = TRUE)
-        if (length(token_files) && any(grepl("gargle", token_files))) {
-            cli::cli_alert_info("Authenticating with method #1: OAuth token cache")
-            googlesheets4::gs4_auth(cache = cache, email = email, scopes = scopes)
-            cli::cli_alert_success("Authenticated via OAuth token cache")
-            return(invisible(NULL))
-        }
-
-        # --- Method 2: Service account JSON file ---
+        # --- Method 1: Service account JSON file ---
         if (file.exists(svc_acct_json_path)) {
-            cli::cli_alert_info("Authenticating with method #2: Service account JSON file")
+            cli::cli_alert_info("Authenticating with method #1: Service account JSON file")
             googlesheets4::gs4_auth(path = svc_acct_json_path, scopes = scopes)
             cli::cli_alert_success("Authenticated via service account JSON file")
+            return(invisible(NULL))
+        }
+        
+        # --- Method 2: OAuth cache ---
+        token_files <- list.files(cache, full.names = TRUE)
+        if (length(token_files) && any(grepl("gargle", token_files))) {
+            cli::cli_alert_info("Authenticating with method #2: OAuth token cache")
+            googlesheets4::gs4_auth(cache = cache, email = email, scopes = scopes)
+            cli::cli_alert_success("Authenticated via OAuth token cache")
             return(invisible(NULL))
         }
 
@@ -75,8 +76,8 @@ gs_auth <- function(
         # --- If all methods fail ---
         cli::cli_abort(c(
             "No valid credentials found.",
-            ">" = paste0("Method #1: OAuth token cache in ", cache),
-            ">" = paste0("Method #2: Service account JSON file at ", svc_acct_json_path),
+            ">" = paste0("Method #1: Service account JSON file at ", svc_acct_json_path),
+            ">" = paste0("Method #2: OAuth token cache in ", cache),
             ">" = paste0("Method #3: Env var ", gargle_creds_env_name)
         ))
 
