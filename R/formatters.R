@@ -72,7 +72,7 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
         # options reference: https://datatables.net/reference/option/
         options = list(
             scrollX = TRUE, 
-            iDisplayLength = 20, # max number of castaways per season
+            iDisplayLength = 25, # max number of castaways per season
             lengthMenu = c(10, 20, 50, 100)
         ),
         rownames = FALSE
