@@ -381,7 +381,7 @@
         "stringr",
         "utils"
       ],
-      "Hash": "10f2391a926b0087a671ed9965ea30a3"
+      "Hash": "a47b486b9f04280eb8521c060d2eb058"
     },
     "emoji": {
       "Package": "emoji",
@@ -422,7 +422,7 @@
         "emo",
         "purrr"
       ],
-      "Hash": "2f625d66f42c60f498967ffe14e07772"
+      "Hash": "7e20709b25cf9432de37b1124bb97cfd"
     },
     "fansi": {
       "Package": "fansi",
