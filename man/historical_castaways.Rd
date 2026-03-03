@@ -5,9 +5,10 @@
 \alias{historical_castaways}
 \title{Historical Castaways}
 \format{
-A data frame with 785 rows and 7 variables:
+A data frame with 785 rows and 8 variables:
 \describe{
 \item{\code{season}}{integer Season number}
+\item{\code{season_name}}{character Season name (subtitle only, e.g. "Winners at War"). NA for seasons with no distinctive name.}
 \item{\code{castaway_id}}{character ID for the castaway}
 \item{\code{castaway_name}}{character Full name of the castaway}
 \item{\code{castaway_day}}{integer The day the castaway was voted out}

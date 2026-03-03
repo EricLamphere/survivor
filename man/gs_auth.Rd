@@ -15,14 +15,19 @@ gs_auth(
 \arguments{
 \item{svc_acct_json_path}{Path to service account json. Defaults to \code{.secrets/gcp-service-account.json}}
 
-\item{cache}{Where the secret is stored}
+\item{gargle_creds_env_name}{Name of env var containing base64 encoded JSON service account}
 
-\item{email}{Email to authenticate with}
+\item{cache}{Path to OAuth cache directory}
 
-\item{deauth_mode}{Whether or not to run only with \code{\link[googlesheets4:gs4_deauth]{googlesheets4::gs4_deauth()}}}
+\item{email}{Email for OAuth authentication}
 
-\item{gargle_creds_path}{Path to credentials used by gargle (hot the application deploys using github actions)}
+\item{deauth_mode}{Logical: if TRUE, run \code{gs4_deauth()} and exit}
 }
 \description{
-Authenticate With Google Sheets
+Tries multiple authentication methods in this order:
+\enumerate{
+\item Service account JSON file (local prod)
+\item OAuth cache (local dev)
+\item Base64-encoded service account from environment variable (CI/CD)
+}
 }
