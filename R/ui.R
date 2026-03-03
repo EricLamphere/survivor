@@ -63,13 +63,11 @@ ui <- function(input) {
             shinydashboard::tabItem(
                 "welcome",
                 shiny::div(
-                    shiny::img(
-                        src = "survivor-logo.png",
-                        align = "right",
-                        height = "35%",
-                        width = "35%"
-                    ),
-                    style = "display: inline-block; position:absolute; right:90px; size: relative"
+                    style = "text-align: center;",
+                    shiny::tags$img(
+                        src = default_survivor_logo(),
+                        style = "max-height: 150px;"
+                    )
                 ),
                 shiny::br(),
                 shiny::h2("Welcome!"),
@@ -161,7 +159,11 @@ ui <- function(input) {
             # PICKS ----
             shinydashboard::tabItem(
                 "standings",
-                shiny::h1(shiny::textOutput("season_label")),
+                shiny::div(
+                    style = "text-align: center;",
+                    shiny::uiOutput("season_logo"),
+                    shiny::h1(shiny::textOutput("season_label"))
+                ),
                 shiny::h3("Last Week on Survivor"),
                 shiny::fluidRow(
                     shiny::conditionalPanel(
@@ -206,16 +208,17 @@ ui <- function(input) {
                         '#standings :is(th, td) {padding: 0;}'
                     ),
                     shinydashboard::box(
-                        title = "Standings", 
-                        status = "primary", 
-                        solidHeader=TRUE, 
+                        title = "Standings",
+                        status = "primary",
+                        solidHeader=TRUE,
                         shiny::div(
                             DT::dataTableOutput("formatted_picks_table"),
                             style = "width = 80%"
                         ),
                         width = "80%"
                     )
-                )
+                ),
+                shiny::uiOutput("season_nav_buttons")
             ),
             
             # WINNERS CLUB ----

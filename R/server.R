@@ -7,7 +7,7 @@
 #' @param output List of outputs
 #' 
 #' @export
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     # Inputs ----
     season_input <- shiny::reactive({
@@ -33,13 +33,22 @@ server <- function(input, output) {
             ignoreNULL = FALSE
         )
     
-    output$season_label <- shiny::renderText({
-        season <- season_input()
-        if (season == all_seasons_label()) {
-            season
+    output$season_logo <- shiny::renderUI({
+        if (season_input() == all_seasons_label()) {
+            logo_url <- default_survivor_logo()
         } else {
-            paste0("Season ", season)
+            szn <- as.character(force_season_number(season_input()))
+            logo_url <- season_logo_urls[[szn]]
         }
+        if (is.null(logo_url)) return(NULL)
+        shiny::div(
+            shiny::tags$img(src = logo_url, referrerpolicy = "no-referrer", style = "max-height: 150px;")
+        )
+    })
+
+    output$season_label <- shiny::renderText({
+        refresh_data()
+        get_season_label(season_input())
     })
     
     output$formatted_picks_table <- DT::renderDataTable(
@@ -140,4 +149,42 @@ server <- function(input, output) {
     
     ## season pots plot ----
     output$season_pots_plot <- shiny::renderPlot({ ui_create_season_pots_plot() })
+
+    ## season navigation buttons ----
+    output$season_nav_buttons <- shiny::renderUI({
+        if (season_input() == all_seasons_label()) return(NULL)
+
+        all_szns <- sort(list_seasons())
+        idx <- which(all_szns == as.integer(season_input()))
+        prev_szn <- if (idx > 1) all_szns[idx - 1] else NULL
+        next_szn <- if (idx < length(all_szns)) all_szns[idx + 1] else NULL
+
+        shiny::fluidRow(
+            style = "margin-top: 12px;",
+            shiny::column(6,
+                if (!is.null(prev_szn)) shiny::actionButton(
+                    "nav_prev",
+                    label = shiny::tagList(shiny::icon("arrow-left"), get_season_label(prev_szn))
+                )
+            ),
+            shiny::column(6, style = "text-align: right;",
+                if (!is.null(next_szn)) shiny::actionButton(
+                    "nav_next",
+                    label = shiny::tagList(get_season_label(next_szn), shiny::icon("arrow-right"))
+                )
+            )
+        )
+    })
+
+    shiny::observeEvent(input$nav_prev, {
+        all_szns <- sort(list_seasons())
+        idx <- which(all_szns == as.integer(season_input()))
+        if (idx > 1) shiny::updateSelectInput(session, "season", selected = all_szns[idx - 1])
+    })
+
+    shiny::observeEvent(input$nav_next, {
+        all_szns <- sort(list_seasons())
+        idx <- which(all_szns == as.integer(season_input()))
+        if (idx < length(all_szns)) shiny::updateSelectInput(session, "season", selected = all_szns[idx + 1])
+    })
 }
