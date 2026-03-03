@@ -591,6 +591,141 @@ fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
 }
 
 
+# castaway image URLs ----
+
+.castaway_cache <- new.env(parent = emptyenv())
+
+
+#' Derive Fandom Wiki Filename Candidates for a Castaway
+#'
+#' Returns one or two `File:` title candidates for the Survivor Fandom wiki
+#' MediaWiki API. The primary candidate replaces spaces with underscores (e.g.
+#' `yam_yam`); the fallback removes spaces entirely (e.g. `caoboi` for "Cao Boi").
+#'
+#' @param szn Season number
+#' @param name Castaway name as stored in `season_picks$castaway_name`
+#' @keywords internal
+.castaway_image_filenames <- function(szn, name) {
+    clean <- tolower(name)
+    clean <- gsub("[.']", "", clean)  # remove periods and apostrophes
+    clean <- gsub("-", "", clean)     # remove hyphens
+    clean <- trimws(clean)
+    primary  <- paste0("File:S", szn, "_", gsub("\\s+", "_", clean), "_t.png")
+    fallback <- paste0("File:S", szn, "_", gsub("\\s+", "", clean), "_t.png")
+    unique(c(primary, fallback))
+}
+
+
+#' Fetch Castaway Thumbnail Image URLs for a Season
+#'
+#' Queries the Survivor Fandom wiki's MediaWiki API for CDN thumbnail URLs for
+#' all castaways in a season. Two filename candidates are tried per castaway:
+#' spaces-as-underscores (e.g. `yam_yam`) and spaces-removed (e.g. `caoboi`).
+#' Returns a named list of `castaway_name → CDN URL`.
+#'
+#' @param szn Season number
+#' @export
+fetch_castaway_image_urls <- function(szn) {
+    fandom_api <- "https://survivor.fandom.com/api.php"
+    szn <- as.integer(szn)
+
+    castaways_in_season <- season_picks |>
+        dplyr::filter(season == szn) |>
+        dplyr::pull(castaway_name) |>
+        unique()
+    castaways_in_season <- castaways_in_season[!is.na(castaways_in_season)]
+    if (length(castaways_in_season) == 0) return(list())
+
+    # Map full_name → wiki nickname via survivoR (e.g. "Yam Yam Arocho" → "Yam Yam").
+    # Falls back to first word of full name for seasons not yet in the package.
+    survivoR_nicknames <- survivoR::castaways |>
+        dplyr::filter(version == "US", season == szn) |>
+        dplyr::distinct(full_name, castaway)
+    nickname_map <- as.list(setNames(survivoR_nicknames$castaway, survivoR_nicknames$full_name))
+
+    # Also index by the stripped full name for castaways whose survivoR full_name
+    # includes a quoted nickname (e.g. 'Oscar "Ozzy" Lusth' → also map 'Oscar Lusth').
+    for (i in seq_len(nrow(survivoR_nicknames))) {
+        fn <- survivoR_nicknames$full_name[i]
+        if (grepl('"', fn)) {
+            stripped <- trimws(gsub('\\s*"[^"]*"\\s*', ' ', fn))
+            stripped <- gsub('\\s+', ' ', stripped)
+            if (is.null(nickname_map[[stripped]])) {
+                nickname_map[[stripped]] <- survivoR_nicknames$castaway[i]
+            }
+        }
+    }
+
+    get_nickname <- function(full_name) {
+        # If the name contains a quoted nickname (e.g. 'Quintavius "Q" Burdette'),
+        # extract it directly — this takes priority over the survivoR lookup.
+        if (grepl('"', full_name)) {
+            m <- regmatches(full_name, regexpr('"([^"]+)"', full_name))
+            if (length(m) > 0) return(gsub('"', '', m))
+        }
+        nick <- nickname_map[[full_name]]
+        if (!is.null(nick)) nick else strsplit(full_name, " ")[[1]][1]
+    }
+
+    # Build filename → castaway_name lookup using the show nickname for the filename.
+    # Also try the real first name as a fallback for cases where the survivoR
+    # nickname doesn't match the wiki (e.g. "Boston Rob" → wiki uses "rob").
+    name_map  <- list()
+    all_files <- character(0)
+    for (name in castaways_in_season) {
+        nickname   <- get_nickname(name)
+        real_first <- strsplit(name, " ")[[1]][1]
+        candidates <- .castaway_image_filenames(szn, nickname)
+        if (!identical(tolower(real_first), tolower(nickname))) {
+            candidates <- unique(c(candidates, .castaway_image_filenames(szn, real_first)))
+        }
+        for (f in candidates) {
+            norm_f <- gsub(" ", "_", f)
+            if (is.null(name_map[[norm_f]])) {
+                name_map[[norm_f]] <- name
+                all_files <- c(all_files, f)
+            }
+        }
+    }
+
+    # Batch query in chunks of 40 to stay under the API 50-title limit
+    urls   <- list()
+    chunks <- split(all_files, ceiling(seq_along(all_files) / 40))
+    for (chunk in chunks) {
+        result <- .fandom_imageinfo(fandom_api, chunk)
+        if (is.null(result)) next
+        for (page in result$query$pages) {
+            if (is.null(page$imageinfo) || length(page$imageinfo) == 0) next
+            norm_title <- gsub(" ", "_", page$title)
+            castaway   <- name_map[[norm_title]]
+            if (!is.null(castaway) && is.null(urls[[castaway]])) {
+                urls[[castaway]] <- page$imageinfo[[1]]$url
+            }
+        }
+    }
+    urls
+}
+
+
+#' Get Castaway Image URLs for a Season (Cached)
+#'
+#' Returns castaway thumbnail image URLs from a package-level cache if
+#' available, otherwise calls [fetch_castaway_image_urls()] and caches the
+#' result for future calls within the session.
+#'
+#' @param szn Season number
+#' @export
+get_castaway_image_urls <- function(szn) {
+    szn_char <- as.character(szn)
+    if (exists(szn_char, envir = .castaway_cache, inherits = FALSE)) {
+        return(get(szn_char, envir = .castaway_cache))
+    }
+    urls <- fetch_castaway_image_urls(szn)
+    assign(szn_char, urls, envir = .castaway_cache)
+    urls
+}
+
+
 #' Default Survivor Logo
 #'
 #' Returns the filename (or path) for the default Survivor logo, used when no
