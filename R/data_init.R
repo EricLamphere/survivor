@@ -497,6 +497,32 @@ set_participant_picking_order <- function(participants_enriched, season_picks) {
         .process_participant_name()
 }
 
+
+#' Create Participants Data Frame
+#'
+#' Main method for creating the participants table with all transformations applied
+#'
+#' @param all_data Named list of tabs and their data from the survivor googlesheet
+#'
+#' @export
+create_season_participants <- function(all_data = NULL) {
+    if (is.null(all_data)) {
+        all_data <- gs_get_all_data()
+    }
+    
+    season_picks <- create_season_picks(all_data, augment_with_historical = FALSE)
+    participants_enriched <- .get_participants_enriched(
+        picks = all_data$picks, 
+        participants = all_data$participants
+    )
+    
+    set_participant_picking_order(
+        participants_enriched = participants_enriched,
+        season_picks = season_picks
+    )
+}
+
+
 # season logo URLs ----
 
 #' Fetch Season Logo URLs from Fandom Wiki
@@ -589,6 +615,30 @@ fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
         }
     )
 }
+
+#' Default Survivor Logo
+#'
+#' Returns the filename (or path) for the default Survivor logo, used when no
+#' season-specific logo is available (e.g. on the Welcome tab or when "All Seasons"
+#' is selected).
+#'
+#' @param include_path Logical; if `TRUE` returns the full relative path including
+#'   the `www/` directory prefix. Defaults to `FALSE`, returning just the filename.
+#'
+#' @return A character string: the filename or path to the default logo.
+#'
+#' @export
+default_survivor_logo <- function(include_path = FALSE) {
+    file <- "survivor-logo.png"
+    path <- "www"
+    
+    if (include_path) {
+        path %//% file 
+    }
+    
+    file
+}
+
 
 
 # castaway image URLs ----
@@ -726,53 +776,9 @@ get_castaway_image_urls <- function(szn) {
 }
 
 
-#' Default Survivor Logo
-#'
-#' Returns the filename (or path) for the default Survivor logo, used when no
-#' season-specific logo is available (e.g. on the Welcome tab or when "All Seasons"
-#' is selected).
-#'
-#' @param include_path Logical; if `TRUE` returns the full relative path including
-#'   the `www/` directory prefix. Defaults to `FALSE`, returning just the filename.
-#'
-#' @return A character string: the filename or path to the default logo.
-#'
-#' @export
-default_survivor_logo <- function(include_path = FALSE) {
-    file <- "survivor-logo.png"
-    path <- "www"
-    
-    if (include_path) {
-        path %//% file 
-    }
-    
-    file
-}
 
 
-#' Create Participants Data Frame
-#'
-#' Main method for creating the participants table with all transformations applied
-#'
-#' @param all_data Named list of tabs and their data from the survivor googlesheet
-#'
-#' @export
-create_season_participants <- function(all_data = NULL) {
-    if (is.null(all_data)) {
-        all_data <- gs_get_all_data()
-    }
-    
-    season_picks <- create_season_picks(all_data, augment_with_historical = FALSE)
-    participants_enriched <- .get_participants_enriched(
-        picks = all_data$picks, 
-        participants = all_data$participants
-    )
-    
-    set_participant_picking_order(
-        participants_enriched = participants_enriched,
-        season_picks = season_picks
-    )
-}
+
 
 
 
