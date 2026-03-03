@@ -20,9 +20,20 @@ library(snakecase)
 #' 
 #' @export
 pull_historical_castaways <- function(start_season = 43) {
-    survivoR::castaways |> 
-        dplyr::filter(version == "US" & season <= start_season & !is.na(place)) |> 
-        dplyr::group_by(season) |> 
+    season_names <-
+        survivoR::season_summary |>
+        dplyr::filter(version == "US") |>
+        dplyr::select(season, season_name) |>
+        dplyr::mutate(
+            season = as.integer(season),
+            subtitle = sub("^Survivor:? *", "", season_name),
+            season_name = dplyr::if_else(grepl("^[0-9]+$", subtitle), NA_character_, subtitle)
+        ) |>
+        dplyr::select(season, season_name)
+
+    survivoR::castaways |>
+        dplyr::filter(version == "US" & season <= start_season & !is.na(place)) |>
+        dplyr::group_by(season) |>
         dplyr::transmute(
             season,
             castaway_id = snakecase::to_snake_case(castaway),
@@ -32,14 +43,15 @@ pull_historical_castaways <- function(start_season = 43) {
             castaway_eliminated = TRUE,
             sole_survivor = place == 1
         ) |>
-        dplyr::group_by(season, castaway_id) |> 
+        dplyr::group_by(season, castaway_id) |>
         dplyr::mutate(
             castaway_id = dplyr::case_when(
                 dplyr::n() > 1 ~ snakecase::to_snake_case(castaway_name),
                 TRUE ~ castaway_id
             )
-        ) |> 
-        dplyr::ungroup() |> 
+        ) |>
+        dplyr::ungroup() |>
+        dplyr::left_join(season_names, by = "season") |>
         dplyr::arrange(desc(season), desc(castaway_rank))
 }
 
