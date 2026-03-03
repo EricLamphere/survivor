@@ -208,16 +208,17 @@ ui <- function(input) {
                         '#standings :is(th, td) {padding: 0;}'
                     ),
                     shinydashboard::box(
-                        title = "Standings", 
-                        status = "primary", 
-                        solidHeader=TRUE, 
+                        title = "Standings",
+                        status = "primary",
+                        solidHeader=TRUE,
                         shiny::div(
                             DT::dataTableOutput("formatted_picks_table"),
                             style = "width = 80%"
                         ),
                         width = "80%"
                     )
-                )
+                ),
+                shiny::uiOutput("season_nav_buttons")
             ),
             
             # WINNERS CLUB ----
