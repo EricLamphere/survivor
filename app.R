@@ -16,6 +16,7 @@ counter <<- 0
 all_data <- gs_get_all_data()
 season_picks <<- create_season_picks(all_data = all_data, augment_with_historical = TRUE)
 season_participants <<- create_season_participants(all_data = all_data)
+season_logo_urls <<- fetch_season_logo_urls()
 
 # run app
 cli::cli_alert_info("Starting application")

@@ -2,9 +2,10 @@
 
 #' @title Season Picks
 #' @description Picks across all seasons recorded in this repo
-#' @format A data frame with 72 rows and 13 variables:
+#' @format A data frame with 72 rows and 14 variables:
 #' \describe{
 #'   \item{\code{season}}{integer Season number}
+#'   \item{\code{season_name}}{character Season name (subtitle only, e.g. "Winners at War"). NA for seasons with no distinctive name.}
 #'   \item{\code{participant_id}}{character The ID for the participant in the pool}
 #'   \item{\code{participant_first}}{character First name of the participant in the pool}
 #'   \item{\code{participant_last}}{character Last name of the participant in the pool}
@@ -25,9 +26,10 @@
 
 #' @title Historical Castaways
 #' @description Castaways from earlier seasons before we started our pool
-#' @format A data frame with 785 rows and 7 variables:
+#' @format A data frame with 785 rows and 8 variables:
 #' \describe{
 #'   \item{\code{season}}{integer Season number}
+#'   \item{\code{season_name}}{character Season name (subtitle only, e.g. "Winners at War"). NA for seasons with no distinctive name.}
 #'   \item{\code{castaway_id}}{character ID for the castaway}
 #'   \item{\code{castaway_name}}{character Full name of the castaway}
 #'   \item{\code{castaway_day}}{integer The day the castaway was voted out}

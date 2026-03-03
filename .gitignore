@@ -4,3 +4,5 @@ README.html
 .DS_Store
 .Rbuildignore
 .secrets
+**/*.venv
+**/*.claude

@@ -30,10 +30,36 @@ all_seasons_label <- function() {
 }
 
 
+#' Get Season Label
+#'
+#' Returns the display title for a season. If a meaningful name exists,
+#' returns "Season X: Name". Otherwise returns "Season X".
+#'
+#' @param szn Season number or `all_seasons_label()`
+#'
+#' @export
+get_season_label <- function(szn = default_season()) {
+    if (szn == all_seasons_label()) {
+        return(szn)
+    }
+    szn_num <- force_season_number(szn)
+    name <- season_picks |>
+        dplyr::filter(season == szn_num) |>
+        dplyr::pull(season_name) |>
+        unique()
+    name <- name[!is.na(name)]
+    if (length(name) == 0 || name[1] == "") {
+        paste0("Season ", szn_num)
+    } else {
+        paste0("Season ", szn_num, ": ", name[1])
+    }
+}
+
+
 #' Get Season Number
-#' 
+#'
 #' If all seasons are specified, then choose the default season
-#' 
+#'
 #' @param szn Season number
 force_season_number <- function(szn = default_season()) {
     if (szn == all_seasons_label()) {

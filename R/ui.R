@@ -63,13 +63,11 @@ ui <- function(input) {
             shinydashboard::tabItem(
                 "welcome",
                 shiny::div(
-                    shiny::img(
+                    style = "text-align: center;",
+                    shiny::tags$img(
                         src = "survivor-logo.png",
-                        align = "right",
-                        height = "35%",
-                        width = "35%"
-                    ),
-                    style = "display: inline-block; position:absolute; right:90px; size: relative"
+                        style = "max-height: 150px;"
+                    )
                 ),
                 shiny::br(),
                 shiny::h2("Welcome!"),
@@ -161,7 +159,11 @@ ui <- function(input) {
             # PICKS ----
             shinydashboard::tabItem(
                 "standings",
-                shiny::h1(shiny::textOutput("season_label")),
+                shiny::div(
+                    style = "text-align: center;",
+                    shiny::uiOutput("season_logo"),
+                    shiny::h1(shiny::textOutput("season_label"))
+                ),
                 shiny::h3("Last Week on Survivor"),
                 shiny::fluidRow(
                     shiny::conditionalPanel(

@@ -33,13 +33,19 @@ server <- function(input, output) {
             ignoreNULL = FALSE
         )
     
+    output$season_logo <- shiny::renderUI({
+        if (season_input() == all_seasons_label()) return(NULL)
+        szn <- as.character(force_season_number(season_input()))
+        logo_url <- season_logo_urls[[szn]]
+        if (is.null(logo_url)) return(NULL)
+        shiny::div(
+            shiny::tags$img(src = logo_url, referrerpolicy = "no-referrer", style = "max-height: 150px;")
+        )
+    })
+
     output$season_label <- shiny::renderText({
-        season <- season_input()
-        if (season == all_seasons_label()) {
-            season
-        } else {
-            paste0("Season ", season)
-        }
+        refresh_data()
+        get_season_label(season_input())
     })
     
     output$formatted_picks_table <- DT::renderDataTable(
