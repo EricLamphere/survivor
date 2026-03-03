@@ -34,9 +34,12 @@ server <- function(input, output, session) {
         )
     
     output$season_logo <- shiny::renderUI({
-        if (season_input() == all_seasons_label()) return(NULL)
-        szn <- as.character(force_season_number(season_input()))
-        logo_url <- season_logo_urls[[szn]]
+        if (season_input() == all_seasons_label()) {
+            logo_url <- default_survivor_logo()
+        } else {
+            szn <- as.character(force_season_number(season_input()))
+            logo_url <- season_logo_urls[[szn]]
+        }
         if (is.null(logo_url)) return(NULL)
         shiny::div(
             shiny::tags$img(src = logo_url, referrerpolicy = "no-referrer", style = "max-height: 150px;")

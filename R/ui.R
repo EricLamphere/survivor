@@ -65,7 +65,7 @@ ui <- function(input) {
                 shiny::div(
                     style = "text-align: center;",
                     shiny::tags$img(
-                        src = "survivor-logo.png",
+                        src = default_survivor_logo(),
                         style = "max-height: 150px;"
                     )
                 ),
