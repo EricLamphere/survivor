@@ -274,10 +274,11 @@ cleanup_season_picks <- function(season_picks) {
         season_picks |>
         dplyr::select(
             season,
+            dplyr::any_of("season_name"),
             dplyr::starts_with("participant_"),
             dplyr::starts_with("castaway_"),
             sole_survivor
-        ) |> 
+        ) |>
         dplyr::arrange(desc(season), castaway_rank, castaway_id) |> 
         dplyr::select(-c(castaway_day_with_tie_breaker, castaway_tie_breaker))
     
@@ -293,8 +294,52 @@ cleanup_season_picks <- function(season_picks) {
 }
 
 
+#' Get Season Names from survivoR Package
+#'
+#' Returns a data frame with `season` and `season_name` for all US seasons,
+#' with the "Survivor: " prefix stripped. Seasons whose subtitle is just a
+#' number (e.g. "Survivor: 49") are returned as NA.
+#'
+#' @keywords internal
+.get_survivoR_season_names <- function() {
+    survivoR::season_summary |>
+        dplyr::filter(version == "US") |>
+        dplyr::select(season, season_name) |>
+        dplyr::mutate(
+            season = as.integer(season),
+            subtitle = sub("^Survivor:? *", "", season_name),
+            season_name = dplyr::if_else(grepl("^[0-9]+$", subtitle), NA_character_, subtitle)
+        ) |>
+        dplyr::select(season, season_name)
+}
+
+
+#' Enrich Picks With Season Names
+#'
+#' Fills in `season_name` from the survivoR package where it is missing.
+#' The Google Sheet value (already in the data) takes priority via coalesce.
+#'
+#' @param picks Picks data frame
+#' @keywords internal
+.enrich_with_season_names <- function(picks) {
+    if (!"season_name" %in% names(picks)) {
+        picks <- dplyr::mutate(picks, season_name = NA_character_)
+    }
+
+    survivoR_names <- tryCatch(
+        .get_survivoR_season_names(),
+        error = function(e) dplyr::tibble(season = integer(), season_name = character())
+    )
+
+    picks |>
+        dplyr::left_join(survivoR_names, by = "season", suffix = c("", "_survivoR")) |>
+        dplyr::mutate(season_name = dplyr::coalesce(season_name, season_name_survivoR)) |>
+        dplyr::select(-dplyr::any_of("season_name_survivoR"))
+}
+
+
 #' Add Historical Data
-#' 
+#'
 #' @param picks Picks data from recent seasons
 add_historical_data <- function(picks) {
     dplyr::bind_rows(
@@ -325,15 +370,16 @@ create_season_picks <- function(all_data = NULL, augment_with_historical = TRUE)
         seasons = all_data$seasons
     )
     
-    picks <- 
+    picks <-
         seasons_tbl |>
         calculate_castaway_fields() |>
-        calculate_participant_fields()
-    
+        calculate_participant_fields() |>
+        .enrich_with_season_names()
+
     if (augment_with_historical) {
         picks <- add_historical_data(picks)
     }
-    
+
     cleanup_season_picks(picks)
 }
 
@@ -451,12 +497,106 @@ set_participant_picking_order <- function(participants_enriched, season_picks) {
         .process_participant_name()
 }
 
+# season logo URLs ----
+
+#' Fetch Season Logo URLs from Fandom Wiki
+#'
+#' Makes a batch imageinfo API call to survivor.fandom.com to get CDN URLs for
+#' each season's logo. The standard filename `US_SN_logo.png` is tried first.
+#' For named seasons where that file doesn't exist (e.g. season 50), the
+#' subtitle from `survivoR::season_summary` is used to derive the filename
+#' (e.g. "In the Hands of the Fans" -> `In_the_Hands_of_the_Fans_Logo.png`).
+#'
+#' Returns a named list of season number (as string) -> CDN URL, suitable for
+#' use directly in `shiny::img(src = ...)`.
+#'
+#' @param seasons Integer vector of season numbers to fetch. Defaults to all
+#'   seasons in the global `season_picks`.
+#'
+#' @export
+fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
+    fandom_api <- "https://survivor.fandom.com/api.php"
+    seasons <- sort(as.integer(seasons))
+
+    # --- Pass 1: standard US_SN_logo.png filenames ---
+    standard_files <- paste0("File:US_S", seasons, "_logo.png")
+    result1 <- .fandom_imageinfo(fandom_api, standard_files)
+    if (is.null(result1)) return(list())
+
+    urls <- list()
+    missing_seasons <- integer(0)
+
+    for (page in result1$query$pages) {
+        # MediaWiki normalizes underscores to spaces in returned titles
+        norm <- gsub(" ", "_", page$title)
+        m <- regmatches(norm, regexpr("(?<=US_S)\\d+(?=_logo)", norm, perl = TRUE))
+        if (!length(m)) next
+        n <- as.integer(m)
+        if (!is.null(page$imageinfo) && length(page$imageinfo) > 0) {
+            urls[[as.character(n)]] <- page$imageinfo[[1]]$url
+        } else {
+            missing_seasons <- c(missing_seasons, n)
+        }
+    }
+
+    # --- Pass 2: for named seasons, derive filename from survivoR season_name ---
+    if (length(missing_seasons) > 0) {
+        szn_names <- survivoR::season_summary[
+            survivoR::season_summary$version == "US" &
+                survivoR::season_summary$season %in% missing_seasons,
+        ]
+
+        fallback_files <- character(0)
+        fallback_key   <- character(0)
+
+        for (i in seq_len(nrow(szn_names))) {
+            subtitle <- sub("^Survivor:?\\s*", "", szn_names$season_name[i])
+            filename <- paste0("File:", gsub("\\s+", "_", subtitle), "_Logo.png")
+            fallback_files <- c(fallback_files, filename)
+            fallback_key   <- c(fallback_key, as.character(szn_names$season[i]))
+        }
+
+        names(fallback_key) <- fallback_files
+
+        result2 <- .fandom_imageinfo(fandom_api, fallback_files)
+        if (!is.null(result2)) {
+            for (page in result2$query$pages) {
+                norm <- gsub(" ", "_", page$title)
+                szn <- fallback_key[[norm]]
+                if (!is.null(szn) && !is.null(page$imageinfo) && length(page$imageinfo) > 0) {
+                    urls[[szn]] <- page$imageinfo[[1]]$url
+                }
+            }
+        }
+    }
+
+    urls
+}
+
+#' @keywords internal
+.fandom_imageinfo <- function(api_base, file_titles) {
+    titles_param <- paste(file_titles, collapse = "|")
+    api_url <- paste0(
+        api_base,
+        "?action=query&prop=imageinfo&iiprop=url&format=json&titles=",
+        utils::URLencode(titles_param, reserved = TRUE)
+    )
+    tryCatch(
+        jsonlite::fromJSON(api_url, simplifyVector = FALSE),
+        error = function(e) {
+            cli::cli_alert_warning("Failed to fetch season logo URLs: {e$message}")
+            NULL
+        }
+    )
+}
+
+
 #' Create Participants Data Frame
-#' 
+#'
 #' Main method for creating the participants table with all transformations applied
-#' 
+#'
 #' @param all_data Named list of tabs and their data from the survivor googlesheet
-#' 
+#'
 #' @export
 create_season_participants <- function(all_data = NULL) {
     if (is.null(all_data)) {
