@@ -86,14 +86,27 @@ server <- function(input, output, session) {
     })
     
     output$season_wiki_box <- shinydashboard::renderInfoBox({
+        szn <- season_input()
+        if (szn == all_seasons_label()) {
+            szn_label <- "Survivor"
+        } else {
+            szn_label <- glue::glue("Season {force_season_number(szn)}")
+        }
         shinydashboard::infoBox(
-            "Wiki Link", 
-            shiny::tags$a(
-                href = make_season_wiki_link(szn = season_input()),
-                glue::glue(
-                    "Season {force_season_number(season_input())}"
+            "Links",
+            shiny::tagList(
+                shiny::tags$a(
+                    href = make_season_wiki_link(szn = szn),
+                    target = "_blank",
+                    glue::glue("Wiki: {szn_label}")
+                ),
+                shiny::tags$br(),
+                shiny::tags$a(
+                    href = make_season_fandom_link(szn = szn),
+                    target = "_blank",
+                    glue::glue("Fandom: {szn_label}")
                 )
-            ), 
+            ),
             icon = shiny::icon("link"),
             color = "aqua"
         )
@@ -136,9 +149,19 @@ server <- function(input, output, session) {
     })
     
     output$sole_survivor_box <- shinydashboard::renderInfoBox({
+        ss      <- sole_survivor()
+        szn_num <- force_season_number(season_input())
+        url <- if (!is.null(ss)) get_castaway_image_urls(szn_num)[[ss]] else NULL
         shinydashboard::infoBox(
-            glue::glue("Season {force_season_number(season_input())} sole survivor"), 
-            glue::glue("{emoji::emoji('tada')} {sole_survivor()} {emoji::emoji('tada')}"),
+            glue::glue("Season {szn_num} sole survivor"),
+            shiny::tagList(
+                if (!is.null(url)) shiny::tags$img(
+                    src = url,
+                    referrerpolicy = "no-referrer",
+                    style = "height: 40px; vertical-align: middle; margin-right: 6px;"
+                ),
+                glue::glue("{emoji::emoji('tada')} {ss} {emoji::emoji('tada')}")
+            ),
             icon = shiny::icon("fire"),
             color = "lime"
         )

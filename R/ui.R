@@ -181,8 +181,7 @@ ui <- function(input) {
                     shinydashboard::infoBoxOutput("season_wiki_box")
                 ),
                 shiny::conditionalPanel(
-                    condition = 'true', #'!output.season_has_started & output.season_label != "All Seasons"',
-                    shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
+                    condition = 'input.season !== "All Seasons"',
                     shiny::fluidRow(
                         shiny::column(
                             width = 6,
@@ -190,9 +189,9 @@ ui <- function(input) {
                                 '#picking_order :is(th, td) {padding: 0;}'
                             ),
                             shinydashboard::box(
-                                title = "Picking Order", 
-                                status = "primary", 
-                                solidHeader=TRUE, 
+                                title = "Picking Order",
+                                status = "primary",
+                                solidHeader=TRUE,
                                 shiny::div(
                                     formattable::formattableOutput("picking_order"),
                                     style = "width = 20%"
