@@ -15,7 +15,7 @@ ui_create_picking_order <- function(szn = default_season()) {
     picking_order <- get_season_participants(szn = szn)
     season_picks <- 
         get_season_picks(szn = szn) |> 
-        dplyr::select(participant_id, castaway_name) |> 
+        dplyr::select(season, participant_id, castaway_name) |> 
         dplyr::filter(!is.na(participant_id))
     
     # paste(picking_order, collapse = ezextras::wrap(emoji::arrow("right"), " "))
@@ -23,7 +23,7 @@ ui_create_picking_order <- function(szn = default_season()) {
         picking_order |> 
         dplyr::left_join(
             season_picks,
-            by = "participant_id"
+            by = c("season", "participant_id")
         ) |> 
         dplyr::transmute(
             Order = picking_order,

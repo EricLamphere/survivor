@@ -407,7 +407,7 @@ set_participant_picking_order <- function(participants_enriched, season_picks) {
         dplyr::distinct(season, participant_id, participant_rank) |> 
         dplyr::arrange(season, desc(participant_rank)) |> 
         dplyr::group_by(season) |> 
-        dplyr::mutate(next_season_picking_order = max(participant_rank, na.rm = TRUE) + 1 - participant_rank) |> 
+        dplyr::mutate(next_season_picking_order = max(c(-Inf, participant_rank), na.rm = TRUE) + 1 - participant_rank) |> 
         dplyr::ungroup() |> 
         split(~season) |> 
         purrr::map(~ dplyr::select(.x, -c(season, participant_rank)))

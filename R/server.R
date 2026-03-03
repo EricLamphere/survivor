@@ -86,14 +86,27 @@ server <- function(input, output, session) {
     })
     
     output$season_wiki_box <- shinydashboard::renderInfoBox({
+        szn <- season_input()
+        if (szn == all_seasons_label()) {
+            szn_label <- "Survivor"
+        } else {
+            szn_label <- glue::glue("Season {force_season_number(szn)}")
+        }
         shinydashboard::infoBox(
-            "Wiki Link", 
-            shiny::tags$a(
-                href = make_season_wiki_link(szn = season_input()),
-                glue::glue(
-                    "Season {force_season_number(season_input())}"
+            "Links",
+            shiny::tagList(
+                shiny::tags$a(
+                    href = make_season_wiki_link(szn = szn),
+                    target = "_blank",
+                    glue::glue("Wiki: {szn_label}")
+                ),
+                shiny::tags$br(),
+                shiny::tags$a(
+                    href = make_season_fandom_link(szn = szn),
+                    target = "_blank",
+                    glue::glue("Fandom: {szn_label}")
                 )
-            ), 
+            ),
             icon = shiny::icon("link"),
             color = "aqua"
         )
