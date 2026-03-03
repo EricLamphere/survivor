@@ -163,11 +163,47 @@ get_castaways_remaining <- function(szn = default_season()) {
 
 
 #' Make Season Wiki Link
-#' 
-#' @param szn Season number
+#'
+#' @param szn Season number or `all_seasons_label()`; defaults to the main
+#'   Survivor Wikipedia article when "All Seasons" is selected.
 make_season_wiki_link <- function(szn = default_season()) {
-    szn <- force_season_number()
+    if (szn == all_seasons_label()) {
+        return("https://en.wikipedia.org/wiki/Survivor_(American_TV_series)")
+    }
+    szn <- force_season_number(szn)
     paste0("https://en.wikipedia.org/wiki/Survivor_", szn)
+}
+
+
+#' Make Season Fandom Link
+#'
+#' Constructs a URL to the season's page on the Survivor Fandom wiki.
+#' Seasons 1-40 use `Survivor:_{Subtitle}` (no number); seasons 41+ use
+#' `Survivor_{N}:_{Subtitle}`. Seasons without a subtitle use `Survivor_{N}`.
+#' Defaults to the Fandom main page when "All Seasons" is selected.
+#'
+#' @param szn Season number or `all_seasons_label()`
+make_season_fandom_link <- function(szn = default_season()) {
+    if (szn == all_seasons_label()) {
+        return("https://survivor.fandom.com/wiki/Main_Page")
+    }
+    szn <- force_season_number(szn)
+    subtitle <- season_picks |>
+        dplyr::filter(season == szn) |>
+        dplyr::pull(season_name) |>
+        unique()
+    subtitle <- subtitle[!is.na(subtitle) & nchar(subtitle) > 0]
+    base <- "https://survivor.fandom.com/wiki/"
+    if (length(subtitle) > 0) {
+        name_part <- gsub("\\s+", "_", subtitle[1])
+        if (szn <= 40) {
+            paste0(base, "Survivor:_", name_part)
+        } else {
+            paste0(base, "Survivor_", szn, ":_", name_part)
+        }
+    } else {
+        paste0(base, "Survivor_", szn)
+    }
 }
 
 
