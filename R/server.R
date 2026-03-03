@@ -149,9 +149,19 @@ server <- function(input, output, session) {
     })
     
     output$sole_survivor_box <- shinydashboard::renderInfoBox({
+        ss      <- sole_survivor()
+        szn_num <- force_season_number(season_input())
+        url <- if (!is.null(ss)) get_castaway_image_urls(szn_num)[[ss]] else NULL
         shinydashboard::infoBox(
-            glue::glue("Season {force_season_number(season_input())} sole survivor"), 
-            glue::glue("{emoji::emoji('tada')} {sole_survivor()} {emoji::emoji('tada')}"),
+            glue::glue("Season {szn_num} sole survivor"),
+            shiny::tagList(
+                if (!is.null(url)) shiny::tags$img(
+                    src = url,
+                    referrerpolicy = "no-referrer",
+                    style = "height: 40px; vertical-align: middle; margin-right: 6px;"
+                ),
+                glue::glue("{emoji::emoji('tada')} {ss} {emoji::emoji('tada')}")
+            ),
             icon = shiny::icon("fire"),
             color = "lime"
         )

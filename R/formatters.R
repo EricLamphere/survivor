@@ -98,7 +98,14 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     ))
     show_season_field <- szn == all_seasons_label()
     
-    display_fields_added <- 
+    # Fetch castaway image URLs once for single-season views
+    img_urls <- if (szn != all_seasons_label()) {
+        get_castaway_image_urls(force_season_number(szn))
+    } else {
+        list()
+    }
+
+    display_fields_added <-
         picks |>
         dplyr::mutate(
             Season = season,
@@ -108,16 +115,35 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
                 participant_full_name
             ),
             `Pool Rank` = scales::ordinal(participant_rank),
-            Castaway = ifelse(
-                !is.na(sole_survivor) & sole_survivor, 
-                glue::glue("{emoji::emoji('tada')} {castaway_name} {emoji::emoji('tada')}"),
-                castaway_name
-            ),
+            Castaway = {
+                img_tag <- vapply(castaway_name, function(name) {
+                    url <- img_urls[[name]]
+                    if (!is.null(url)) {
+                        as.character(glue::glue(
+                            '<img src="{url}" height="35" referrerpolicy="no-referrer">'
+                        ))
+                    } else {
+                        ""
+                    }
+                }, character(1))
+                label <- ifelse(
+                    !is.na(sole_survivor) & sole_survivor,
+                    glue::glue("{emoji::emoji('tada')} {castaway_name} {emoji::emoji('tada')}"),
+                    castaway_name
+                )
+                color <- dplyr::case_when(
+                    !is.na(castaway_rank) & castaway_rank == 1 ~ "green",
+                    !is.na(castaway_day) ~ "red",
+                    TRUE ~ "black"
+                )
+                content <- ifelse(img_tag != "", paste0(img_tag, " ", label), as.character(label))
+                paste0('<span style="color:', color, '">', content, '</span>')
+            },
             `Day Voted Out` = castaway_day,
             `Castaway Rank` = scales::ordinal(castaway_rank)
         )
-    
-    
+
+
     # data driven filters
     if (show_money_fields) {
         display_fields_added <-
@@ -127,21 +153,19 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
             ) |>
             dplyr::select(Season, Participant, `$$$`, dplyr::everything())
     }
-    
+
     if (!show_participant_fields) {
         display_fields_added <-
-            display_fields_added |> 
+            display_fields_added |>
             dplyr::select(-dplyr::starts_with('participant_'), -Participant, -`Pool Rank`, -`$$$`)
     }
-    
+
     if (!show_season_field) {
-        display_fields_added <- 
-            display_fields_added |> 
+        display_fields_added <-
+            display_fields_added |>
             dplyr::select(-Season)
     }
-    
-    
-    # clean and format
+
     display_fields_added |>
         dplyr::mutate(
             dplyr::across(
@@ -188,16 +212,6 @@ get_column_formats <- function(data) {
         `$$$` = picks_formatter(`Pool Rank` == "1st", color_no = "red")
     )
     castaway_formats <- list(
-        Castaway = formattable::formatter(
-            "span", 
-            style = ~ formattable::style(
-                color = dplyr::case_when(
-                    `Castaway Rank` == "1st" ~ "green",
-                    `Day Voted Out` != "-" ~ "red",
-                    TRUE ~ "black"
-                )
-            )
-        ),
         `Castaway Rank` = picks_formatter(`Castaway Rank` == "1st"),
         `Sole Survivor` = picks_formatter(`Castaway Rank` == "1st")
     )
