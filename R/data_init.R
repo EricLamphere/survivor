@@ -591,6 +591,30 @@ fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
 }
 
 
+#' Default Survivor Logo
+#'
+#' Returns the filename (or path) for the default Survivor logo, used when no
+#' season-specific logo is available (e.g. on the Welcome tab or when "All Seasons"
+#' is selected).
+#'
+#' @param include_path Logical; if `TRUE` returns the full relative path including
+#'   the `www/` directory prefix. Defaults to `FALSE`, returning just the filename.
+#'
+#' @return A character string: the filename or path to the default logo.
+#'
+#' @export
+default_survivor_logo <- function(include_path = FALSE) {
+    file <- "survivor-logo.png"
+    path <- "www"
+    
+    if (include_path) {
+        path %//% file 
+    }
+    
+    file
+}
+
+
 #' Create Participants Data Frame
 #'
 #' Main method for creating the participants table with all transformations applied
