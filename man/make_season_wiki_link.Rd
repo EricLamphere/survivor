@@ -7,7 +7,8 @@
 make_season_wiki_link(szn = default_season())
 }
 \arguments{
-\item{szn}{Season number}
+\item{szn}{Season number or \code{all_seasons_label()}; defaults to the main
+Survivor Wikipedia article when "All Seasons" is selected.}
 }
 \description{
 Make Season Wiki Link
