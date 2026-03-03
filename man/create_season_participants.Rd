@@ -4,7 +4,7 @@
 \alias{create_season_participants}
 \title{Create Participants Data Frame}
 \usage{
-create_season_participants(all_data)
+create_season_participants(all_data = NULL)
 }
 \arguments{
 \item{all_data}{Named list of tabs and their data from the survivor googlesheet}

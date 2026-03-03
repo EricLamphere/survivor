@@ -5,9 +5,10 @@
 \alias{season_picks}
 \title{Season Picks}
 \format{
-A data frame with 72 rows and 13 variables:
+A data frame with 72 rows and 14 variables:
 \describe{
 \item{\code{season}}{integer Season number}
+\item{\code{season_name}}{character Season name (subtitle only, e.g. "Winners at War"). NA for seasons with no distinctive name.}
 \item{\code{participant_id}}{character The ID for the participant in the pool}
 \item{\code{participant_first}}{character First name of the participant in the pool}
 \item{\code{participant_last}}{character Last name of the participant in the pool}
