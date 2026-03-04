@@ -45,11 +45,12 @@ castaway's show nickname in lowercase. Examples:
 | Rob Mariano (S40) | `S40_rob_t.png` |
 | J'Tia Taylor (S28) | `S28_jtia_t.png` |
 
-Naming rules applied when cleaning the nickname:
+Naming rules the wiki applies when deriving the slug from a nickname:
 - Lowercase everything
 - Remove periods and apostrophes
 - Remove hyphens
-- Spaces → underscores (primary); spaces removed (fallback, e.g. `caoboi`)
+- Spaces → underscores (e.g. `yam_yam`); sometimes spaces removed entirely
+  (e.g. `caoboi` for "Cao Boi")
 
 ## How the code works
 
@@ -69,59 +70,55 @@ Naming rules applied when cleaning the nickname:
 **1. Get castaway names**
 
 Pull all unique `castaway_name` values for the season from `season_picks`.
-Normalize any non-breaking spaces (`\u00A0` → ` `) that can come through from
-Google Sheets.
+Non-breaking spaces (`\u00A0`) that can come through from Google Sheets are
+normalized per-name during candidate generation (not at the vector level) so
+that the original name string is preserved as the URL map key — callers look
+up URLs using the same raw name from `season_picks`.
 
-**2. Derive the show nickname**
+**2. Generate filename candidates**
 
-`castaway_name` is the full name (e.g. `"Yam Yam Arocho"`). The wiki uses
-the show nickname (`"yam_yam"`). The nickname is resolved in priority order:
+No external package data is needed. For each castaway, candidates are
+generated in priority order:
 
-1. **Quoted nickname in the name** — e.g. `'Quintavius "Q" Burdette'`
-   extracts `"Q"` directly.
-2. **survivoR package lookup** — `survivoR::castaways` is joined by
-   `(version == "US", season, full_name)` to get the `castaway` field
-   (e.g. `"Yam Yam Arocho"` → `"Yam Yam"`). The map also indexes
-   stripped versions of names that contain a quoted nickname in survivoR.
-3. **First word fallback** — if no match is found, uses the first word of
-   the full name.
+1. **Quoted nickname** — if the name contains double-quoted text (e.g.
+   `Quintavius "Q" Burdette`), the quoted portion is extracted and lowercased
+   (`q`), producing `File:S47_q_t.png`. This takes highest priority.
+2. **First-N-words combinations** (N = 1, 2, 3) — the cleaned name is split
+   into words, then the first N words are joined with underscores and also
+   concatenated without spaces:
+   - "Yam Yam Arocho" → `yam`, `yam_yam`, `yamyam`, `yam_yam_arocho`, …
+   - "Cao Boi Bui" → `cao`, `cao_boi`, `caoboi`, …
+3. **Each individual word** — every word of the cleaned name is tried as a
+   standalone slug. This catches cases where the wiki uses the real first name
+   instead of a show nickname (e.g. "Boston Rob Mariano" → `rob`).
 
-**3. Generate filename candidates**
+Candidate cleaning mirrors the wiki's slug rules: lowercase, remove `.'`,
+remove `-`, replace remaining non-alphanumeric characters with a space.
 
-For each castaway, up to four candidates are generated:
-- Nickname, spaces → underscores: `S44_yam_yam_t.png`
-- Nickname, spaces removed: `S44_yamyam_t.png`
-- If the real first name differs from the nickname, also:
-  - Real first name, spaces → underscores: `S40_rob_t.png`
-  - Real first name, spaces removed (if applicable)
-
-This handles cases like `"Boston Rob"` (nickname) → wiki uses `S40_rob_t.png`
-(real first name).
-
-**4. Build a reverse lookup**
+**3. Build a reverse lookup**
 
 Every candidate filename (normalized to underscores) is stored in `name_map`
 pointing back to the original `castaway_name`. This is used later to
 re-associate API results with the right castaway.
 
-**5. Batch API call**
+**4. Batch API call**
 
-All candidate filenames for the season are sent to the API in one request
-(chunked at 40 titles if needed to stay under the 50-title limit).
+All candidate filenames for the season are sent to the `imageinfo` API in one
+request (chunked at 40 titles if needed to stay under the 50-title limit).
 
-**6. First valid match wins**
+**5. First valid match wins**
 
 The response is iterated. For each file that exists (has `imageinfo`):
 - The returned title (MediaWiki normalizes underscores → spaces) is converted
   back to underscores.
-- `name_map` maps the filename back to the `castaway_name`.
+- `name_map` maps the filename back to the original `castaway_name`.
 - If no URL has been stored yet for that castaway, the URL is saved.
 
-Candidates are added in priority order (nickname first, real first name
-second), so the preferred filename wins naturally when multiple candidates
-exist for one castaway.
+Candidates are added in priority order (quoted nickname first, then
+first-N-words, then individual words), so the preferred filename wins
+naturally when multiple candidates match one castaway.
 
-**7. Result**
+**6. Result**
 
 A named list of `castaway_name → CDN URL` is returned and cached. Castaways
 with no matching file on the wiki are simply absent from the list, and the
