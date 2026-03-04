@@ -294,30 +294,70 @@ cleanup_season_picks <- function(season_picks) {
 }
 
 
-#' Get Season Names from survivoR Package
+#' Get Season Names
 #'
-#' Returns a data frame with `season` and `season_name` for all US seasons,
-#' with the "Survivor: " prefix stripped. Seasons whose subtitle is just a
-#' number (e.g. "Survivor: 49") are returned as NA.
+#' Two-pass lookup for season subtitle(s). The first pass checks the provided
+#' `picks` data frame (Google Sheet data). The second pass falls back to
+#' `survivoR::season_summary` for any seasons not found in the first pass.
 #'
-#' @keywords internal
-.get_survivoR_season_names <- function() {
-    survivoR::season_summary |>
-        dplyr::filter(version == "US") |>
-        dplyr::select(season, season_name) |>
-        dplyr::mutate(
-            season = as.integer(season),
-            subtitle = sub("^Survivor:? *", "", season_name),
-            season_name = dplyr::if_else(grepl("^[0-9]+$", subtitle), NA_character_, subtitle)
-        ) |>
-        dplyr::select(season, season_name)
+#' Returns a tibble with `season` (integer) and `season_name` (subtitle, with
+#' the "Survivor: " prefix already stripped). Seasons with no known subtitle
+#' are excluded.
+#'
+#' @param seasons Integer vector of season numbers to look up
+#' @param picks Optional data frame with `season` and `season_name` columns
+#'   used as the first-pass source. If `NULL`, uses the global `season_picks`.
+#' @export
+get_season_name_tbl <- function(seasons, picks = NULL) {
+    seasons <- unique(as.integer(seasons))
+
+    data_source <- if (!is.null(picks)) {
+        picks
+    } else if (exists("season_picks", envir = .GlobalEnv)) {
+        season_picks
+    } else {
+        NULL
+    }
+
+    # First pass: picks data (Google Sheet)
+    from_data <- dplyr::tibble(season = integer(), season_name = character())
+    if (!is.null(data_source) && all(c("season", "season_name") %in% names(data_source))) {
+        from_data <- data_source |>
+            dplyr::filter(season %in% seasons, !is.na(season_name), nchar(season_name) > 0) |>
+            dplyr::distinct(season, season_name) |>
+            dplyr::mutate(season = as.double(season), season_name = as.character(season_name)) |>
+            dplyr::group_by(season) |>
+            dplyr::slice(1) |>
+            dplyr::ungroup()
+    }
+
+    # Second pass: survivoR for remaining seasons
+    remaining <- setdiff(seasons, from_data$season)
+    if (length(remaining) > 0) {
+        from_survivoR <- tryCatch(
+            survivoR::season_summary |>
+                dplyr::filter(version == "US", season %in% remaining) |>
+                dplyr::transmute(
+                    season = as.integer(season),
+                    subtitle = sub("^Survivor:? *", "", season_name),
+                    season_name = dplyr::if_else(grepl("^[0-9]+$", subtitle), NA_character_, subtitle)
+                ) |>
+                dplyr::select(season, season_name) |>
+                dplyr::filter(!is.na(season_name)),
+            error = function(e) dplyr::tibble(season = integer(), season_name = character())
+        )
+        from_data <- dplyr::bind_rows(from_data, from_survivoR)
+    }
+
+    from_data
 }
 
 
 #' Enrich Picks With Season Names
 #'
-#' Fills in `season_name` from the survivoR package where it is missing.
-#' The Google Sheet value (already in the data) takes priority via coalesce.
+#' Fills in `season_name` where it is missing using [get_season_name_tbl()]:
+#' first from the Google Sheet data already in `picks`, then from
+#' `survivoR::season_summary` as a fallback.
 #'
 #' @param picks Picks data frame
 #' @keywords internal
@@ -326,15 +366,12 @@ cleanup_season_picks <- function(season_picks) {
         picks <- dplyr::mutate(picks, season_name = NA_character_)
     }
 
-    survivoR_names <- tryCatch(
-        .get_survivoR_season_names(),
-        error = function(e) dplyr::tibble(season = integer(), season_name = character())
-    )
+    season_names <- get_season_name_tbl(unique(picks$season), picks = picks)
 
     picks |>
-        dplyr::left_join(survivoR_names, by = "season", suffix = c("", "_survivoR")) |>
-        dplyr::mutate(season_name = dplyr::coalesce(season_name, season_name_survivoR)) |>
-        dplyr::select(-dplyr::any_of("season_name_survivoR"))
+        dplyr::left_join(season_names, by = "season", suffix = c("", "_lookup")) |>
+        dplyr::mutate(season_name = dplyr::coalesce(season_name, season_name_lookup)) |>
+        dplyr::select(-dplyr::any_of("season_name_lookup"))
 }
 
 
@@ -530,7 +567,7 @@ create_season_participants <- function(all_data = NULL) {
 #' Makes a batch imageinfo API call to survivor.fandom.com to get CDN URLs for
 #' each season's logo. The standard filename `US_SN_logo.png` is tried first.
 #' For named seasons where that file doesn't exist (e.g. season 50), the
-#' subtitle from `survivoR::season_summary` is used to derive the filename
+#' subtitle from [get_season_name_tbl()] is used to derive the filename
 #' (e.g. "In the Hands of the Fans" -> `In_the_Hands_of_the_Fans_Logo.png`).
 #'
 #' Returns a named list of season number (as string) -> CDN URL, suitable for
@@ -565,18 +602,15 @@ fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
         }
     }
 
-    # --- Pass 2: for named seasons, derive filename from survivoR season_name ---
+    # --- Pass 2: for named seasons, derive filename from season name ---
     if (length(missing_seasons) > 0) {
-        szn_names <- survivoR::season_summary[
-            survivoR::season_summary$version == "US" &
-                survivoR::season_summary$season %in% missing_seasons,
-        ]
+        szn_names <- get_season_name_tbl(missing_seasons)
 
         fallback_files <- character(0)
         fallback_key   <- character(0)
 
         for (i in seq_len(nrow(szn_names))) {
-            subtitle <- sub("^Survivor:?\\s*", "", szn_names$season_name[i])
+            subtitle <- szn_names$season_name[i]
             filename <- paste0("File:", gsub("\\s+", "_", subtitle), "_Logo.png")
             fallback_files <- c(fallback_files, filename)
             fallback_key   <- c(fallback_key, as.character(szn_names$season[i]))
@@ -646,31 +680,17 @@ default_survivor_logo <- function(include_path = FALSE) {
 .castaway_cache <- new.env(parent = emptyenv())
 
 
-#' Derive Fandom Wiki Filename Candidates for a Castaway
-#'
-#' Returns one or two `File:` title candidates for the Survivor Fandom wiki
-#' MediaWiki API. The primary candidate replaces spaces with underscores (e.g.
-#' `yam_yam`); the fallback removes spaces entirely (e.g. `caoboi` for "Cao Boi").
-#'
-#' @param szn Season number
-#' @param name Castaway name as stored in `season_picks$castaway_name`
-#' @keywords internal
-.castaway_image_filenames <- function(szn, name) {
-    clean <- tolower(name)
-    clean <- gsub("[.']", "", clean)  # remove periods and apostrophes
-    clean <- gsub("-", "", clean)     # remove hyphens
-    clean <- trimws(clean)
-    primary  <- paste0("File:S", szn, "_", gsub("\\s+", "_", clean), "_t.png")
-    fallback <- paste0("File:S", szn, "_", gsub("\\s+", "", clean), "_t.png")
-    unique(c(primary, fallback))
-}
-
-
 #' Fetch Castaway Thumbnail Image URLs for a Season
 #'
-#' Queries the Survivor Fandom wiki's MediaWiki API for CDN thumbnail URLs for
-#' all castaways in a season. Two filename candidates are tried per castaway:
-#' spaces-as-underscores (e.g. `yam_yam`) and spaces-removed (e.g. `caoboi`).
+#' Queries the Survivor Fandom wiki's MediaWiki `imageinfo` API for CDN
+#' thumbnail URLs for all castaways in a season. Multiple filename candidates
+#' are generated per castaway (quoted nickname, first-N-words, individual words)
+#' and validated in a single batch API call. First valid match wins.
+#'
+#' No-break spaces (U+00A0) are normalized per-name during candidate generation
+#' only; the original name is preserved as the lookup key so that callers using
+#' names directly from `season_picks` can find the URL.
+#'
 #' Returns a named list of `castaway_name → CDN URL`.
 #'
 #' @param szn Season number
@@ -684,58 +704,56 @@ fetch_castaway_image_urls <- function(szn) {
         dplyr::pull(castaway_name) |>
         unique()
     castaways_in_season <- castaways_in_season[!is.na(castaways_in_season)]
+    # NOTE: do NOT normalize castaways_in_season here — original names must be
+    # preserved as URL map keys so that formatters.R lookups match season_picks names.
     if (length(castaways_in_season) == 0) return(list())
 
-    # Map full_name → wiki nickname via survivoR (e.g. "Yam Yam Arocho" → "Yam Yam").
-    # Falls back to first word of full name for seasons not yet in the package.
-    survivoR_nicknames <- survivoR::castaways |>
-        dplyr::filter(version == "US", season == szn) |>
-        dplyr::distinct(full_name, castaway)
-    nickname_map <- as.list(setNames(survivoR_nicknames$castaway, survivoR_nicknames$full_name))
-
-    # Also index by the stripped full name for castaways whose survivoR full_name
-    # includes a quoted nickname (e.g. 'Oscar "Ozzy" Lusth' → also map 'Oscar Lusth').
-    for (i in seq_len(nrow(survivoR_nicknames))) {
-        fn <- survivoR_nicknames$full_name[i]
-        if (grepl('"', fn)) {
-            stripped <- trimws(gsub('\\s*"[^"]*"\\s*', ' ', fn))
-            stripped <- gsub('\\s+', ' ', stripped)
-            if (is.null(nickname_map[[stripped]])) {
-                nickname_map[[stripped]] <- survivoR_nicknames$castaway[i]
-            }
-        }
-    }
-
-    get_nickname <- function(full_name) {
-        # If the name contains a quoted nickname (e.g. 'Quintavius "Q" Burdette'),
-        # extract it directly — this takes priority over the survivoR lookup.
-        if (grepl('"', full_name)) {
-            m <- regmatches(full_name, regexpr('"([^"]+)"', full_name))
-            if (length(m) > 0) return(gsub('"', '', m))
-        }
-        
-        full_name_ascii <- gsub("\u00A0", " ", full_name)
-        nick <- nickname_map[[full_name]] %||% nickname_map[[full_name_ascii]]
-        if (!is.null(nick)) nick else strsplit(full_name_ascii, " ")[[1]][1]
-    }
-
-    # Build filename → castaway_name lookup using the show nickname for the filename.
-    # Also try the real first name as a fallback for cases where the survivoR
-    # nickname doesn't match the wiki (e.g. "Boston Rob" → wiki uses "rob").
     name_map  <- list()
     all_files <- character(0)
-    # name <- "Bruce Perreault"
-    for (name in castaways_in_season) {
-        nickname   <- get_nickname(name)
-        real_first <- strsplit(name, " ")[[1]][1]
-        candidates <- .castaway_image_filenames(szn, nickname)
-        if (!identical(tolower(real_first), tolower(nickname))) {
-            candidates <- unique(c(candidates, .castaway_image_filenames(szn, real_first)))
+
+    for (orig_name in castaways_in_season) {
+        # Normalize no-break space per-name for candidate generation only
+        name <- gsub("\u00A0", " ", orig_name)
+
+        candidates <- character(0)
+
+        # Priority 1: quoted nickname (e.g. 'Quintavius "Q" Burdette' → "q")
+        if (grepl('"', name)) {
+            m <- regmatches(name, regexpr('"([^"]+)"', name))
+            if (length(m) > 0) {
+                nick <- tolower(gsub('"', "", m))
+                candidates <- c(candidates, paste0("File:S", szn, "_", nick, "_t.png"))
+            }
         }
-        for (f in candidates) {
+
+        # Clean the name to derive word tokens (same rules wiki applies to slugs)
+        clean <- tolower(name)
+        clean <- gsub("[.']", "", clean)          # remove periods and apostrophes
+        clean <- gsub("-", "", clean)              # remove hyphens
+        clean <- gsub("[^a-z0-9 ]", " ", clean)   # other special chars → space
+        clean <- trimws(gsub("\\s+", " ", clean))
+        words <- strsplit(clean, " ")[[1]]
+        n     <- length(words)
+
+        # Priority 2: first-N-words (underscore and concatenated, N=1..3)
+        for (end in seq_len(min(n, 3))) {
+            slug_u <- paste(words[seq_len(end)], collapse = "_")
+            slug_c <- paste(words[seq_len(end)], collapse = "")
+            candidates <- c(candidates, paste0("File:S", szn, "_", slug_u, "_t.png"))
+            if (slug_c != slug_u) {
+                candidates <- c(candidates, paste0("File:S", szn, "_", slug_c, "_t.png"))
+            }
+        }
+
+        # Priority 3: each individual word (catches e.g. "rob" from "Boston Rob Mariano")
+        for (w in words) {
+            candidates <- c(candidates, paste0("File:S", szn, "_", w, "_t.png"))
+        }
+
+        for (f in unique(candidates)) {
             norm_f <- gsub(" ", "_", f)
             if (is.null(name_map[[norm_f]])) {
-                name_map[[norm_f]] <- name
+                name_map[[norm_f]] <- orig_name   # preserve original name as key
                 all_files <- c(all_files, f)
             }
         }
