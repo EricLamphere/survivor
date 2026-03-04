@@ -10,7 +10,8 @@
 \item{picks}{Picks data frame}
 }
 \description{
-Fills in \code{season_name} from the survivoR package where it is missing.
-The Google Sheet value (already in the data) takes priority via coalesce.
+Fills in \code{season_name} where it is missing using \code{\link[=get_season_name_tbl]{get_season_name_tbl()}}:
+first from the Google Sheet data already in \code{picks}, then from
+\code{survivoR::season_summary} as a fallback.
 }
 \keyword{internal}

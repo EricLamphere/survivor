@@ -14,7 +14,7 @@ seasons in the global \code{season_picks}.}
 Makes a batch imageinfo API call to survivor.fandom.com to get CDN URLs for
 each season's logo. The standard filename \code{US_SN_logo.png} is tried first.
 For named seasons where that file doesn't exist (e.g. season 50), the
-subtitle from \code{survivoR::season_summary} is used to derive the filename
+subtitle from \code{\link[=get_season_name_tbl]{get_season_name_tbl()}} is used to derive the filename
 (e.g. "In the Hands of the Fans" -> \code{In_the_Hands_of_the_Fans_Logo.png}).
 }
 \details{
