@@ -10,8 +10,15 @@ fetch_castaway_image_urls(szn)
 \item{szn}{Season number}
 }
 \description{
-Queries the Survivor Fandom wiki's MediaWiki API for CDN thumbnail URLs for
-all castaways in a season. Two filename candidates are tried per castaway:
-spaces-as-underscores (e.g. \code{yam_yam}) and spaces-removed (e.g. \code{caoboi}).
+Queries the Survivor Fandom wiki's MediaWiki \code{imageinfo} API for CDN
+thumbnail URLs for all castaways in a season. Multiple filename candidates
+are generated per castaway (quoted nickname, first-N-words, individual words)
+and validated in a single batch API call. First valid match wins.
+}
+\details{
+No-break spaces (U+00A0) are normalized per-name during candidate generation
+only; the original name is preserved as the lookup key so that callers using
+names directly from \code{season_picks} can find the URL.
+
 Returns a named list of \verb{castaway_name → CDN URL}.
 }
