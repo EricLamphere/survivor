@@ -713,8 +713,10 @@ fetch_castaway_image_urls <- function(szn) {
             m <- regmatches(full_name, regexpr('"([^"]+)"', full_name))
             if (length(m) > 0) return(gsub('"', '', m))
         }
-        nick <- nickname_map[[full_name]]
-        if (!is.null(nick)) nick else strsplit(full_name, " ")[[1]][1]
+        
+        full_name_ascii <- gsub("\u00A0", " ", full_name)
+        nick <- nickname_map[[full_name]] %||% nickname_map[[full_name_ascii]]
+        if (!is.null(nick)) nick else strsplit(full_name_ascii, " ")[[1]][1]
     }
 
     # Build filename → castaway_name lookup using the show nickname for the filename.
@@ -722,6 +724,7 @@ fetch_castaway_image_urls <- function(szn) {
     # nickname doesn't match the wiki (e.g. "Boston Rob" → wiki uses "rob").
     name_map  <- list()
     all_files <- character(0)
+    # name <- "Bruce Perreault"
     for (name in castaways_in_season) {
         nickname   <- get_nickname(name)
         real_first <- strsplit(name, " ")[[1]][1]
@@ -739,7 +742,7 @@ fetch_castaway_image_urls <- function(szn) {
     }
 
     # Batch query in chunks of 40 to stay under the API 50-title limit
-    urls   <- list()
+    urls <- list()
     chunks <- split(all_files, ceiling(seq_along(all_files) / 40))
     for (chunk in chunks) {
         result <- .fandom_imageinfo(fandom_api, chunk)
