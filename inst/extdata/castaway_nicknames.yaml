@@ -1,0 +1,259 @@
+# Castaway Nickname Mappings for Image Lookups
+#
+# This file maps castaway names (as they appear in the database) to their
+# show nicknames used in Fandom wiki image filenames.
+#
+# Format:
+#   castaway_name:
+#     default: nickname  # Used for all seasons unless overridden
+#     season_X: nickname # Season-specific override
+#
+# Examples:
+# - "Oscar Lusth" is known as "ozzy" in all seasons
+# - "Rob Mariano" has different image files across seasons
+
+# Global nicknames (apply to all seasons unless overridden)
+Oscar Lusth:
+  default: ozzy
+
+Benjamin Wade:
+  default: coach
+
+James Thomas Jr.:
+  default: jt
+
+# Returning players with season-specific images
+Rob Mariano:
+  4: rob
+  8: boston_rob
+  20: boston_rob
+  22: boston_rob
+  40: boston_rob
+
+James Clement:
+  15: james
+  16: jamesm  # Different file in Micronesia
+  20: james
+
+Jenna Lewis:
+  1: jenna
+  8: jenna_l
+
+Jenna Morasca:
+  default: jenna_m
+
+Rob Cesternino:
+  default: rob_c
+
+# Early seasons (1-10)
+Kim Johnson:
+  default: kim_j
+
+Kim Powers:
+  default: kim_p
+
+Robert Zbacnik:
+  default: robb
+
+Ryan Opray:
+  default: ryan_o
+
+Ryan Shoulders:
+  default: ryan_s
+
+Jennifer Lyon:
+  default: jenn
+
+Kimberly Mullen:
+  default: kim
+
+# Cook Islands (S13)
+Rebekah Lee:
+  default: becky
+
+Nathan Gonzalez:
+  default: nate
+
+Anh-Tuan Bui:
+  default: caoboi
+
+John Calderon:
+  default: jp
+
+Virgilio Garcia:
+  default: billy
+
+# Fiji (S14)
+Andria Herd:
+  default: dreamz
+
+Kenward Bernis:
+  default: boo
+
+Lisette Linares:
+  default: lisi
+
+James Reid:
+  default: rocky
+
+# China (S15)
+Michael Zernow:
+  default: frosti
+
+Steve Morris:
+  default: chicken
+
+# Vanuatu (S9)
+James Crittenden:
+  default: chad
+
+# Micronesia (S16)
+Kathleen Sleckman:
+  default: kathy
+
+Michael Bortone:
+  default: mikey
+
+# Gabon (S17)
+Robert Crowley:
+  default: bob
+
+Jessica Kiper:
+  default: sugar
+
+Danny Brown:
+  default: gc
+
+# Tocantins (S18)
+Tamara Johnson-George:
+  default: taj
+
+Debra Beebe:
+  default: debbie
+
+# Samoa (S19)
+Russell Hantz:
+  default: russell_h
+
+Shannon Waters:
+  default: shambo
+
+Elizabeth Kim:
+  default: liz
+
+Russell Swan:
+  default: russell_s
+
+# Nicaragua (S21)
+Jud Birza:
+  default: fabio
+
+Matthew Lenahan:
+  default: sash
+
+Ben Henry:
+  default: benry
+
+Kelly Shinn:
+  default: purple_kelly
+
+Kelly Bruno:
+  default: kelly_b
+
+James Tarantino:
+  default: jimmy_t
+
+Jimmy Johnson:
+  default: jimmy_j
+
+Wendy-Jo DeSmidt-Kohlhoff:
+  default: wendy
+
+# One World (S24)
+Greg Smith:
+  default: tarzan
+
+Troy Robertson:
+  default: troyzan
+
+# Philippines (S25)
+Peter Yurkowski:
+  default: pete
+
+Roberta Saint-Amour:
+  default: rc
+
+Roxanne Morris:
+  default: roxy
+
+# Caramoan (S26)
+Edward Fox:
+  default: eddie
+
+Alexandra Pohevitz:
+  default: allie
+
+# Blood vs Water (S27)
+Laura Boneham:
+  default: laura_b
+
+Laura Morett:
+  default: laura_m
+
+# Cagayan (S28)
+Yung Hwang:
+  default: woo
+
+Kassandra McQuillen:
+  default: kass
+
+Latasha Fox:
+  default: tasha
+
+# Worlds Apart (S30)
+Vince Sly:
+  default: vince
+
+# Second Chance (S31)
+# Uses same nicknames as original seasons
+
+# Kaoh Rong (S32)
+Joseph Del Campo:
+  default: joe
+
+Elisabeth Markham:
+  default: liz
+
+# Millennials vs Gen X (S33)
+Justin Starrett:
+  default: jay
+
+Jessica Figueroa:
+  default: figgy
+
+Ciandre Taylor:
+  default: cece
+
+# Game Changers (S34)
+# Most returning players use their original nicknames
+
+# Heroes vs Healers vs Hustlers (S35)
+John Hilsabeck:
+  default: jp
+
+Desiree Williams:
+  default: desi
+
+Alexandrea Elliott:
+  default: ali
+
+# Edge of Extinction (S38)
+Dan DaSilva:
+  default: wardog
+
+# Island of the Idols (S39)
+Shantel Smith:
+  default: shan
+
+Jairus Robinson:
+  default: jamal
