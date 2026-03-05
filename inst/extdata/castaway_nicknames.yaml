@@ -24,26 +24,25 @@ James Thomas Jr.:
 
 # Returning players with season-specific images
 Rob Mariano:
-  4: rob
-  8: boston_rob
-  20: boston_rob
-  22: boston_rob
-  40: boston_rob
+  default: rob
+  8: robm
 
 James Clement:
-  15: james
-  16: jamesm  # Different file in Micronesia
-  20: james
+  default: james
 
 Jenna Lewis:
+  default: jenna
   1: jenna
   8: jenna_l
 
 Jenna Morasca:
   default: jenna_m
+  6: jenna
+  8: jennam
 
 Rob Cesternino:
-  default: rob_c
+  default: robc
+  6: rob
 
 # Early seasons (1-10)
 Kim Johnson:
@@ -112,7 +111,7 @@ Kathleen Sleckman:
   default: kathy
 
 Michael Bortone:
-  default: mikey
+  default: mikeyb
 
 # Gabon (S17)
 Robert Crowley:
@@ -133,7 +132,8 @@ Debra Beebe:
 
 # Samoa (S19)
 Russell Hantz:
-  default: russell_h
+  default: russell
+  19: russellh
 
 Shannon Waters:
   default: shambo
@@ -142,7 +142,8 @@ Elizabeth Kim:
   default: liz
 
 Russell Swan:
-  default: russell_s
+  default: russells
+  25: russell
 
 # Nicaragua (S21)
 Jud Birza:
@@ -155,7 +156,7 @@ Ben Henry:
   default: benry
 
 Kelly Shinn:
-  default: purple_kelly
+  default: kellys
 
 Kelly Bruno:
   default: kelly_b
@@ -198,7 +199,8 @@ Laura Boneham:
   default: laura_b
 
 Laura Morett:
-  default: laura_m
+  default: lauram
+  19: laura
 
 # Cagayan (S28)
 Yung Hwang:
@@ -211,6 +213,7 @@ Latasha Fox:
   default: tasha
 
 # Worlds Apart (S30)
+# Vince has NO IMAGE: https://survivor.fandom.com/wiki/Survivor:_Worlds_Apart
 Vince Sly:
   default: vince
 
@@ -256,4 +259,4 @@ Shantel Smith:
   default: shan
 
 Jairus Robinson:
-  default: jamal
+  default: jd
