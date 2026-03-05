@@ -680,6 +680,74 @@ default_survivor_logo <- function(include_path = FALSE) {
 .castaway_cache <- new.env(parent = emptyenv())
 
 
+# Cache for nickname mappings (loaded once per session)
+.nickname_cache <- new.env(parent = emptyenv())
+
+
+#' Load Castaway Nickname Mappings from YAML
+#'
+#' Loads nickname mappings from the YAML configuration file.
+#' Results are cached for the session.
+#'
+#' @return List of nickname mappings
+#' @keywords internal
+.load_nickname_mappings <- function() {
+    # Check cache first
+    if (exists("mappings", envir = .nickname_cache, inherits = FALSE)) {
+        return(get("mappings", envir = .nickname_cache))
+    }
+
+    # Load from YAML file
+    yaml_path <- system.file("extdata", "castaway_nicknames.yaml", package = "survivor")
+
+    if (!file.exists(yaml_path)) {
+        cli::cli_alert_warning("Nickname mapping file not found: {yaml_path}")
+        return(list())
+    }
+
+    mappings <- yaml::read_yaml(yaml_path)
+
+    # Cache the mappings
+    assign("mappings", mappings, envir = .nickname_cache)
+
+    mappings
+}
+
+
+#' Get Castaway Nickname for Image Lookup
+#'
+#' Maps full/database names to their commonly known show nicknames for image lookups.
+#' Supports both global nicknames and season-specific overrides.
+#'
+#' @param name Castaway name from the database
+#' @param season Season number (optional). If provided, will check for season-specific nickname first.
+#' @return Nickname if one exists, otherwise NULL
+#' @keywords internal
+.get_castaway_nickname <- function(name, season = NULL) {
+    mappings <- .load_nickname_mappings()
+
+    # Check if this castaway has a nickname mapping
+    if (!name %in% names(mappings)) {
+        return(NULL)
+    }
+
+    castaway_mapping <- mappings[[name]]
+
+    # If season is provided and there's a season-specific mapping, use it
+    if (!is.null(season) && !is.null(castaway_mapping[[as.character(season)]])) {
+        return(castaway_mapping[[as.character(season)]])
+    }
+
+    # Otherwise use the default mapping
+    if (!is.null(castaway_mapping[["default"]])) {
+        return(castaway_mapping[["default"]])
+    }
+
+    # If neither exists, return NULL
+    NULL
+}
+
+
 #' Fetch Castaway Thumbnail Image URLs for a Season
 #'
 #' Queries the Survivor Fandom wiki's MediaWiki `imageinfo` API for CDN
@@ -717,6 +785,18 @@ fetch_castaway_image_urls <- function(szn) {
 
         candidates <- character(0)
 
+        # Priority 0: known nickname mapping (e.g. 'Oscar Lusth' → "ozzy")
+        # Pass season number to get season-specific nicknames for returning players
+        mapped_nickname <- .get_castaway_nickname(orig_name, season = szn)
+        if (!is.null(mapped_nickname)) {
+            candidates <- c(candidates, paste0("File:S", szn, "_", mapped_nickname, "_t.png"))
+            # Also try without underscore for compound nicknames
+            if (grepl("_", mapped_nickname)) {
+                no_underscore <- gsub("_", "", mapped_nickname)
+                candidates <- c(candidates, paste0("File:S", szn, "_", no_underscore, "_t.png"))
+            }
+        }
+
         # Priority 1: quoted nickname (e.g. 'Quintavius "Q" Burdette' → "q")
         if (grepl('"', name)) {
             m <- regmatches(name, regexpr('"([^"]+)"', name))
@@ -748,6 +828,19 @@ fetch_castaway_image_urls <- function(szn) {
         # Priority 3: each individual word (catches e.g. "rob" from "Boston Rob Mariano")
         for (w in words) {
             candidates <- c(candidates, paste0("File:S", szn, "_", w, "_t.png"))
+        }
+
+        # Priority 4: first name + last initial (e.g. "kim_j" for Kim Johnson)
+        if (n >= 2) {
+            first <- words[1]
+            last_initial <- substr(words[n], 1, 1)
+            candidates <- c(candidates, paste0("File:S", szn, "_", first, "_", last_initial, "_t.png"))
+            # Also try without underscore
+            candidates <- c(candidates, paste0("File:S", szn, "_", first, last_initial, "_t.png"))
+
+            # Also try last name only (some contestants known by last name)
+            last <- words[n]
+            candidates <- c(candidates, paste0("File:S", szn, "_", last, "_t.png"))
         }
 
         for (f in unique(candidates)) {

@@ -71,7 +71,7 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
         escape = FALSE,
         # options reference: https://datatables.net/reference/option/
         options = list(
-            scrollX = TRUE, 
+            scrollX = TRUE,
             iDisplayLength = 25, # max number of castaways per season
             lengthMenu = c(5, 10, 25, 50, 100)
         ),
@@ -98,7 +98,8 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     ))
     show_season_field <- szn == all_seasons_label()
     
-    # Fetch castaway image URLs once for single-season views
+    # Fetch castaway image URLs only for single-season views
+    # For "All Seasons" view, skip image fetching to avoid 60+ second load time
     img_urls <- if (szn != all_seasons_label()) {
         get_castaway_image_urls(force_season_number(szn))
     } else {
@@ -120,7 +121,7 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
                     url <- img_urls[[name]]
                     if (!is.null(url)) {
                         as.character(glue::glue(
-                            '<img src="{url}" height="35" referrerpolicy="no-referrer">'
+                            '<img src="{url}" height="35" referrerpolicy="no-referrer" loading="lazy">'
                         ))
                     } else {
                         ""
