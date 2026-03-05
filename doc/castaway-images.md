@@ -84,6 +84,8 @@ For each castaway, candidates are generated in priority order:
 - Supports both default nicknames and season-specific overrides
 - Example: "Oscar Lusth" → `ozzy` (all seasons), "Rob Mariano" in S4 → `rob`, in S8+ → `boston_rob`
 - Also tries compound nicknames without underscores (e.g., `boston_rob` → `bostonrob`)
+- **If a nickname is found, ALL other candidate generation is skipped** - the YAML mapping is authoritative
+- This prevents conflicts (e.g., both "James Clement" and "James Thomas Jr." trying to claim `S20_james_t.png`)
 - See the [Nickname Mapping System](#nickname-mapping-system) section below for details
 
 **Priority 1: Quoted nickname**

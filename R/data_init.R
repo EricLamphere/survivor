@@ -723,7 +723,7 @@ default_survivor_logo <- function(include_path = FALSE) {
 #' @param season Season number (optional). If provided, will check for season-specific nickname first.
 #' @return Nickname if one exists, otherwise NULL
 #' @keywords internal
-.get_castaway_nickname <- function(name, season = NULL) {
+get_castaway_nickname <- function(name, season = NULL) {
     mappings <- .load_nickname_mappings()
 
     # Check if this castaway has a nickname mapping
@@ -787,7 +787,8 @@ fetch_castaway_image_urls <- function(szn) {
 
         # Priority 0: known nickname mapping (e.g. 'Oscar Lusth' → "ozzy")
         # Pass season number to get season-specific nicknames for returning players
-        mapped_nickname <- .get_castaway_nickname(orig_name, season = szn)
+        # If a nickname exists, use ONLY that and skip all fallback logic
+        mapped_nickname <- get_castaway_nickname(orig_name, season = szn)
         if (!is.null(mapped_nickname)) {
             candidates <- c(candidates, paste0("File:S", szn, "_", mapped_nickname, "_t.png"))
             # Also try without underscore for compound nicknames
@@ -795,52 +796,55 @@ fetch_castaway_image_urls <- function(szn) {
                 no_underscore <- gsub("_", "", mapped_nickname)
                 candidates <- c(candidates, paste0("File:S", szn, "_", no_underscore, "_t.png"))
             }
-        }
+            # Skip all other candidate generation - the YAML mapping is authoritative
+        } else {
+            # Only generate fallback candidates if NO nickname mapping exists
 
-        # Priority 1: quoted nickname (e.g. 'Quintavius "Q" Burdette' → "q")
-        if (grepl('"', name)) {
-            m <- regmatches(name, regexpr('"([^"]+)"', name))
-            if (length(m) > 0) {
-                nick <- tolower(gsub('"', "", m))
-                candidates <- c(candidates, paste0("File:S", szn, "_", nick, "_t.png"))
+            # Priority 1: quoted nickname (e.g. 'Quintavius "Q" Burdette' → "q")
+            if (grepl('"', name)) {
+                m <- regmatches(name, regexpr('"([^"]+)"', name))
+                if (length(m) > 0) {
+                    nick <- tolower(gsub('"', "", m))
+                    candidates <- c(candidates, paste0("File:S", szn, "_", nick, "_t.png"))
+                }
             }
-        }
 
-        # Clean the name to derive word tokens (same rules wiki applies to slugs)
-        clean <- tolower(name)
-        clean <- gsub("[.']", "", clean)          # remove periods and apostrophes
-        clean <- gsub("-", "", clean)              # remove hyphens
-        clean <- gsub("[^a-z0-9 ]", " ", clean)   # other special chars → space
-        clean <- trimws(gsub("\\s+", " ", clean))
-        words <- strsplit(clean, " ")[[1]]
-        n     <- length(words)
+            # Clean the name to derive word tokens (same rules wiki applies to slugs)
+            clean <- tolower(name)
+            clean <- gsub("[.']", "", clean)          # remove periods and apostrophes
+            clean <- gsub("-", "", clean)              # remove hyphens
+            clean <- gsub("[^a-z0-9 ]", " ", clean)   # other special chars → space
+            clean <- trimws(gsub("\\s+", " ", clean))
+            words <- strsplit(clean, " ")[[1]]
+            n     <- length(words)
 
-        # Priority 2: first-N-words (underscore and concatenated, N=1..3)
-        for (end in seq_len(min(n, 3))) {
-            slug_u <- paste(words[seq_len(end)], collapse = "_")
-            slug_c <- paste(words[seq_len(end)], collapse = "")
-            candidates <- c(candidates, paste0("File:S", szn, "_", slug_u, "_t.png"))
-            if (slug_c != slug_u) {
-                candidates <- c(candidates, paste0("File:S", szn, "_", slug_c, "_t.png"))
+            # Priority 2: first-N-words (underscore and concatenated, N=1..3)
+            for (end in seq_len(min(n, 3))) {
+                slug_u <- paste(words[seq_len(end)], collapse = "_")
+                slug_c <- paste(words[seq_len(end)], collapse = "")
+                candidates <- c(candidates, paste0("File:S", szn, "_", slug_u, "_t.png"))
+                if (slug_c != slug_u) {
+                    candidates <- c(candidates, paste0("File:S", szn, "_", slug_c, "_t.png"))
+                }
             }
-        }
 
-        # Priority 3: each individual word (catches e.g. "rob" from "Boston Rob Mariano")
-        for (w in words) {
-            candidates <- c(candidates, paste0("File:S", szn, "_", w, "_t.png"))
-        }
+            # Priority 3: each individual word (catches e.g. "rob" from "Boston Rob Mariano")
+            for (w in words) {
+                candidates <- c(candidates, paste0("File:S", szn, "_", w, "_t.png"))
+            }
 
-        # Priority 4: first name + last initial (e.g. "kim_j" for Kim Johnson)
-        if (n >= 2) {
-            first <- words[1]
-            last_initial <- substr(words[n], 1, 1)
-            candidates <- c(candidates, paste0("File:S", szn, "_", first, "_", last_initial, "_t.png"))
-            # Also try without underscore
-            candidates <- c(candidates, paste0("File:S", szn, "_", first, last_initial, "_t.png"))
+            # Priority 4: first name + last initial (e.g. "kim_j" for Kim Johnson)
+            if (n >= 2) {
+                first <- words[1]
+                last_initial <- substr(words[n], 1, 1)
+                candidates <- c(candidates, paste0("File:S", szn, "_", first, "_", last_initial, "_t.png"))
+                # Also try without underscore
+                candidates <- c(candidates, paste0("File:S", szn, "_", first, last_initial, "_t.png"))
 
-            # Also try last name only (some contestants known by last name)
-            last <- words[n]
-            candidates <- c(candidates, paste0("File:S", szn, "_", last, "_t.png"))
+                # Also try last name only (some contestants known by last name)
+                last <- words[n]
+                candidates <- c(candidates, paste0("File:S", szn, "_", last, "_t.png"))
+            }
         }
 
         for (f in unique(candidates)) {
