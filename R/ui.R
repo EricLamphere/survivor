@@ -201,7 +201,14 @@ ui <- function(input) {
                         )
                     )
                 ),
-                shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
+                shiny::div(
+                    style = "display: flex; justify-content: space-between; align-items: center;",
+                    shiny::actionButton(inputId = "refresh_data", label = "Refresh data"),
+                    shiny::conditionalPanel(
+                        condition = "input.season == 'All Seasons'",
+                        shiny::actionButton("load_castaway_images", "Load castaway images")
+                    )
+                ),
                 shiny::fluidRow(
                     shiny::tags$style(
                         '#standings :is(th, td) {padding: 0;}'

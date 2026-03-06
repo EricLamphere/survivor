@@ -894,6 +894,55 @@ get_castaway_image_urls <- function(szn) {
 }
 
 
+#' Fetch and Cache Castaway Image URLs for All Seasons in Parallel
+#'
+#' Uses `furrr::future_map` with a multisession plan to concurrently fetch
+#' castaway image URLs for every season, then merges into a single named list
+#' suitable for the "All Seasons" table view.
+#'
+#' @return Named list of castaway_name -> CDN URL across all seasons
+#' @export
+fetch_all_seasons_image_urls <- function() {
+    seasons <- sort(unique(season_picks$season[!is.na(season_picks$season)]))
+
+    uncached <- seasons[!vapply(
+        as.character(seasons),
+        function(s) exists(s, envir = .castaway_cache, inherits = FALSE),
+        logical(1)
+    )]
+
+    if (length(uncached) > 0) {
+        n_workers <- round(future::availableCores()*.8) # use 80% of the systems cores
+        oplan <- future::plan("multisession", workers = n_workers)
+        on.exit(future::plan(oplan), add = TRUE)
+
+        sp <- season_picks  # capture for worker export
+        results <- furrr::future_map(
+            uncached,
+            fetch_castaway_image_urls,
+            .options = furrr::furrr_options(
+                seed = NULL,
+                globals = list(
+                    season_picks = sp,
+                    get_castaway_nickname = get_castaway_nickname,
+                    .fandom_imageinfo = .fandom_imageinfo,
+                    .castaway_cache = .castaway_cache
+                )
+            )
+        )
+
+        for (i in seq_along(uncached)) {
+            assign(as.character(uncached[[i]]), results[[i]], envir = .castaway_cache)
+        }
+    }
+
+    # Merge all seasons from cache into one flat named list
+    merged <- list()
+    for (s in as.character(seasons)) {
+        merged <- c(merged, get(s, envir = .castaway_cache, inherits = FALSE))
+    }
+    merged
+}
 
 
 

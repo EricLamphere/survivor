@@ -57,8 +57,8 @@ ui_create_picking_order <- function(szn = default_season()) {
 #'  been picked by a contestant
 #' 
 #' @export
-ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
-    picks_data <- .picks_table__base_data(szn = szn, picks_only = picks_only)
+ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE, show_all_images = FALSE) {
+    picks_data <- .picks_table__base_data(szn = szn, picks_only = picks_only, show_all_images = show_all_images)
     
     formatted <-
         picks_data |>
@@ -87,7 +87,7 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
 #' @param szn Season number. Defaults to `default_season()`
 #' @param picks_only Logical, whether or not to only show castaways that have 
 #'  been picked by a contestant
-.picks_table__base_data <- function(szn = default_season(), picks_only = FALSE) {
+.picks_table__base_data <- function(szn = default_season(), picks_only = FALSE, show_all_images = FALSE) {
     picks <- get_season_picks(szn = szn, picked = picks_only)
     
     # data driven flags
@@ -98,10 +98,10 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE) {
     ))
     show_season_field <- szn == all_seasons_label()
     
-    # Fetch castaway image URLs only for single-season views
-    # For "All Seasons" view, skip image fetching to avoid 60+ second load time
     img_urls <- if (szn != all_seasons_label()) {
         get_castaway_image_urls(force_season_number(szn))
+    } else if (show_all_images) {
+        fetch_all_seasons_image_urls()
     } else {
         list()
     }

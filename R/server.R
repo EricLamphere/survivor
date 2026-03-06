@@ -13,6 +13,18 @@ server <- function(input, output, session) {
     season_input <- shiny::reactive({
         input$season
     })
+
+    load_all_images <- shiny::reactiveVal(FALSE)
+
+    shiny::observeEvent(season_input(), {
+        if (season_input() != all_seasons_label()) {
+            load_all_images(FALSE)
+        }
+    })
+
+    shiny::observeEvent(input$load_castaway_images, {
+        load_all_images(TRUE)
+    })
     
     picks_only_input <- shiny::reactive({
         input$picks_only
@@ -56,7 +68,8 @@ server <- function(input, output, session) {
             refresh_data()
             ui_create_picks_table(
                 szn = season_input(),
-                picks_only = picks_only_input()
+                picks_only = picks_only_input(),
+                show_all_images = load_all_images()
             )
         }
     )
