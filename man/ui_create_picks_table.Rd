@@ -4,7 +4,11 @@
 \alias{ui_create_picks_table}
 \title{Format Season Picks Table}
 \usage{
-ui_create_picks_table(szn = default_season(), picks_only = FALSE)
+ui_create_picks_table(
+  szn = default_season(),
+  picks_only = FALSE,
+  show_all_images = FALSE
+)
 }
 \arguments{
 \item{szn}{Season number. Defaults to \code{default_season()}}

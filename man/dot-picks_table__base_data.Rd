@@ -4,7 +4,11 @@
 \alias{.picks_table__base_data}
 \title{Base Data for Season Picks Table}
 \usage{
-.picks_table__base_data(szn = default_season(), picks_only = FALSE)
+.picks_table__base_data(
+  szn = default_season(),
+  picks_only = FALSE,
+  show_all_images = FALSE
+)
 }
 \arguments{
 \item{szn}{Season number. Defaults to \code{default_season()}}
