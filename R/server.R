@@ -15,14 +15,18 @@ server <- function(input, output, session) {
     })
 
     load_all_images <- shiny::reactiveVal(FALSE)
+    images_ever_loaded <- shiny::reactiveVal(FALSE)
 
     shiny::observeEvent(season_input(), {
         if (season_input() != all_seasons_label()) {
             load_all_images(FALSE)
+        } else if (images_ever_loaded()) {
+            load_all_images(TRUE)
         }
     })
 
     shiny::observeEvent(input$load_castaway_images, {
+        images_ever_loaded(TRUE)
         load_all_images(TRUE)
     })
     

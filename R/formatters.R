@@ -110,6 +110,7 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE, sh
         picks |>
         dplyr::mutate(
             Season = season,
+            `Season Name` = dplyr::if_else(!is.na(season_name) & nchar(season_name) > 0, season_name, as.character(season)),
             Participant = ifelse(
                 !is.na(participant_winner) & participant_winner,
                 glue::glue("{emoji::emoji('star')} {participant_full_name} {emoji::emoji('star')}"),
@@ -161,10 +162,14 @@ ui_create_picks_table <- function(szn = default_season(), picks_only = FALSE, sh
             dplyr::select(-dplyr::starts_with('participant_'), -Participant, -`Pool Rank`, -`$$$`)
     }
 
-    if (!show_season_field) {
+    if (show_season_field) {
         display_fields_added <-
             display_fields_added |>
-            dplyr::select(-Season)
+            dplyr::relocate(`Season Name`, .after = Season)
+    } else {
+        display_fields_added <-
+            display_fields_added |>
+            dplyr::select(-Season, -`Season Name`)
     }
 
     display_fields_added |>
