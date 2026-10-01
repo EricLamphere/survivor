@@ -633,21 +633,44 @@ fetch_season_logo_urls <- function(seasons = unique(season_picks$season)) {
     urls
 }
 
+# MediaWiki rejects the entire request (`toomanyvalues`) above 50 titles
+.fandom_max_titles <- 50
+
 #' @keywords internal
 .fandom_imageinfo <- function(api_base, file_titles) {
+    chunks <- split(file_titles, ceiling(seq_along(file_titles) / .fandom_max_titles))
+    results <- lapply(chunks, function(chunk) .fandom_imageinfo_chunk(api_base, chunk))
+    pages <- unlist(
+        lapply(results, function(res) res$query$pages),
+        recursive = FALSE,
+        use.names = FALSE
+    )
+    if (is.null(pages)) return(NULL)
+    list(query = list(pages = pages))
+}
+
+#' @keywords internal
+.fandom_imageinfo_chunk <- function(api_base, file_titles) {
     titles_param <- paste(file_titles, collapse = "|")
     api_url <- paste0(
         api_base,
         "?action=query&prop=imageinfo&iiprop=url&format=json&titles=",
         utils::URLencode(titles_param, reserved = TRUE)
     )
-    tryCatch(
+    result <- tryCatch(
         jsonlite::fromJSON(api_url, simplifyVector = FALSE),
         error = function(e) {
-            cli::cli_alert_warning("Failed to fetch season logo URLs: {e$message}")
+            cli::cli_alert_warning("Failed to fetch Fandom image URLs: {e$message}")
             NULL
         }
     )
+    if (!is.null(result$error)) {
+        cli::cli_alert_warning(
+            "Fandom API error ({result$error$code}): {result$error$info}"
+        )
+        return(NULL)
+    }
+    result
 }
 
 #' Default Survivor Logo
@@ -926,6 +949,8 @@ fetch_all_seasons_image_urls <- function() {
                     season_picks = sp,
                     get_castaway_nickname = get_castaway_nickname,
                     .fandom_imageinfo = .fandom_imageinfo,
+                    .fandom_imageinfo_chunk = .fandom_imageinfo_chunk,
+                    .fandom_max_titles = .fandom_max_titles,
                     .castaway_cache = .castaway_cache
                 )
             )

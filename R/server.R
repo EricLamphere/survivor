@@ -42,6 +42,7 @@ server <- function(input, output, session) {
             all_data <- gs_get_all_data()
             season_picks <<- create_season_picks(all_data)
             season_participants <<- create_season_participants(all_data)
+            season_logo_urls <<- fetch_season_logo_urls()
         }
     }) |> 
         shiny::bindEvent(
@@ -50,6 +51,7 @@ server <- function(input, output, session) {
         )
     
     output$season_logo <- shiny::renderUI({
+        refresh_data()
         if (season_input() == all_seasons_label()) {
             logo_url <- default_survivor_logo()
         } else {
